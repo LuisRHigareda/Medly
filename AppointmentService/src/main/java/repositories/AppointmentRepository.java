@@ -19,7 +19,7 @@ public interface AppointmentRepository extends JpaRepository<Booking, Integer> {
      * @param referenceNumber
      * @return 
      */
-    public Optional<Booking> findByReferenceNumber(Integer referenceNumber);
+    public Optional<Booking> findByReferenceNumber(Long referenceNumber);
     // Queries based on the patient's id
     /**
      * 

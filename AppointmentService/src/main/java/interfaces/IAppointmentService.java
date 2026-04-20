@@ -22,7 +22,7 @@ public interface IAppointmentService {
     public CancelAppointmentResponse cancelAppointment(CancelAppointmentRequest request);
     // Queries
     public BookingDTO getBookingById(Integer id);
-    public BookingDTO getBookingByReferenceNumber(Integer reference);
+    public BookingDTO getBookingByReferenceNumber(Long reference);
     public List<BookingDTO> getAllBookings();
     public List<BookingDTO> getBookingsByPatient(Integer patientId);
     public List<BookingDTO> getBookingsByPatientStatus(Integer patientId, BookingStatus status);

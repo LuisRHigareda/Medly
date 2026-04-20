@@ -8,11 +8,13 @@ import interfaces.IAppointmentService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import mappers.BookingMapper;
 import mx.edu.itson.soap.appointments.AddAppointmentRequest;
 import mx.edu.itson.soap.appointments.AddAppointmentResponse;
 import mx.edu.itson.soap.appointments.CancelAppointmentRequest;
@@ -25,8 +27,11 @@ import soapExceptions.ConsultingRoomHasExistingAppointmentException;
 import soapExceptions.NotUpdatableAppointmentException;
 import soapExceptions.PatientHasExistingAppointmentException;
 import soapExceptions.AppointmentNotFoundException;
+import soapExceptions.NotFutureDateException;
+import soapExceptions.OriginalAppointmentNotInThePastException;
 import util.ReferenceMaker;
 import util.TimeValidator;
+import util.XMLDateFormatter;
 
 /**
  *
@@ -43,18 +48,22 @@ public class AppointmentService implements IAppointmentService{
 
     @Override
     public AddAppointmentResponse addAppointment(AddAppointmentRequest request) {
-        // Happy path temporal implementation
+        // Retrieves the patient's id
+        Integer patientId = request.getPatientId();
+        // Patient validation pending. UserService not created yet...
+        
+        // Retrieves the consulting room's id
+        Integer consultingRoomId = request.getConsultingRoomId();
+        // Consulting room validation pending. UserService not created yet...
         
         // Formats the date and time of the request to a LocalDateTime object
-        XMLGregorianCalendar requestDateTime = request.getDateTime();
-        LocalDateTime dateTime = LocalDateTime.of(
-                requestDateTime.getDay(),
-                requestDateTime.getMonth(), 
-                requestDateTime.getDay(), 
-                requestDateTime.getHour(), 
-                requestDateTime.getMinute(), 
-                requestDateTime.getSecond()
-        );
+        LocalDateTime dateTime = XMLDateFormatter.toLocalDateTime(request.getDateTime());
+        
+        // Checks if the appointment's date is in the future
+        if(!dateTime.isAfter(LocalDateTime.now())) {throw new NotFutureDateException();}
+        
+        // Checks if the given time is valid
+        TimeValidator.verifyTime(dateTime.toLocalTime());
         
         // Checks whether the patient has another appointment with the same given date and time
         Booking existingBookingPatient = appointmentRepository.findByPatientIdDateTime(request.getPatientId(), dateTime).orElse(null);
@@ -64,19 +73,10 @@ public class AppointmentService implements IAppointmentService{
         Booking existingBookingConsultingRoom = appointmentRepository.findByConsultingRoomDateTime(request.getConsultingRoomId(), dateTime).orElse(null);
         if(existingBookingConsultingRoom != null) {throw new ConsultingRoomHasExistingAppointmentException();}
         
-        // Checks if the given time is valid
-        TimeValidator.verifyTime(dateTime.toLocalTime());
-        
         // Arranges the appointment entity with the request's information
-        Appointment appointment = new Appointment();
-        appointment.setDateTime(dateTime);
-        appointment.setPatientId(request.getPatientId());
-        appointment.setConsultingRoomId(request.getConsultingRoomId());
+        Appointment appointment = new Appointment(patientId, consultingRoomId, dateTime);
         // Arranges the booking entity with the request's information
-        Booking booking = new Booking();
-        booking.setAppointment(appointment);
-        booking.setPatientId(request.getPatientId());
-        booking.setReferenceNumber(ReferenceMaker.generateReferenceNumber());
+        Booking booking = new Booking(patientId, appointment, ReferenceMaker.generateReferenceNumber(), BookingStatus.TO_BE_CONFIRMED);
         booking.setStatus(BookingStatus.TO_BE_CONFIRMED);
         
         try {
@@ -93,8 +93,8 @@ public class AppointmentService implements IAppointmentService{
             response.setReferenceNumber(booking.getReferenceNumber());
             response.setSuccessMessage("Success!");
             return response;
-        } 
-        catch (DatatypeConfigurationException ex) {throw new RuntimeException("This shouldn't happened!");} 
+        }
+        catch (DatatypeConfigurationException ex) {throw new RuntimeException("Unexpected error!");} 
         catch(Exception e){throw new RuntimeException("Unexpected error!");}
     }
 
@@ -133,6 +133,10 @@ public class AppointmentService implements IAppointmentService{
         // Verifies if the original booking has not been confirmed, canceled, or missed
         if(originalBooking.getStatus() != BookingStatus.TO_BE_CONFIRMED) {throw new NotUpdatableAppointmentException();}
         
+        // Verifies that the retrieved appointment is still set in the past
+        if(!originalBooking.getAppointment().getDateTime().isAfter(LocalDateTime.now()))
+            throw new OriginalAppointmentNotInThePastException();
+        
         // Sets the booking status to "CANCELED"
         originalBooking.setStatus(BookingStatus.CANCELED);
         
@@ -148,68 +152,79 @@ public class AppointmentService implements IAppointmentService{
 
     @Override
     public BookingDTO getBookingById(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Booking entity = appointmentRepository.findById(id).orElse(null);
+        return (entity != null) ? BookingMapper.toDTO(entity) : null;
     }
 
     @Override
-    public BookingDTO getBookingByReferenceNumber(Integer reference) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public BookingDTO getBookingByReferenceNumber(Long reference) {
+        Booking entity = appointmentRepository.findByReferenceNumber(reference).orElse(null);
+        return (entity != null) ? BookingMapper.toDTO(entity) : null;
     }
 
     @Override
     public List<BookingDTO> getAllBookings() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findAll();
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByPatient(Integer patientId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByPatientId(patientId);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByPatientStatus(Integer patientId, BookingStatus status) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByPatientStatus(patientId, status);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByPatientDate(Integer patientId, LocalDate date) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByPatientDate(patientId, date);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByPatientStatusDate(Integer patientId, BookingStatus status, LocalDate date) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByPatientDateStatus(patientId, date, status);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByFilterPatient(Integer patientId, BookingStatus status, LocalDate date) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByFilterPatient(patientId, date, status);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByConsultingRoom(Integer consultingRoomId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByConsultingRoomId(consultingRoomId);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByConsultingRoomStatus(Integer consultingRoomId, BookingStatus status) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByConsultingRoomStatus(consultingRoomId, status);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByConsultingRoomDate(Integer consultingRoomId, LocalDate date) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByConsultingRoomDate(consultingRoomId, date);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByConsultingRoomStatusDate(Integer consultingRoomId, BookingStatus status, LocalDate date) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByConsultingRoomDateStatus(consultingRoomId, date, status);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
 
     @Override
     public List<BookingDTO> getBookingsByFilterConsultingRoom(Integer consultingRoomId, BookingStatus status, LocalDate date) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Booking> entities = appointmentRepository.findByFilterConsultingRoom(consultingRoomId, date, status);
+        return (!entities.isEmpty()) ? entities.stream().map(entity -> BookingMapper.toDTO(entity)).toList() : new ArrayList<>();
     }
-    
-    
 }
