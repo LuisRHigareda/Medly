@@ -21,10 +21,10 @@ public class Appointment implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    @Column(name = "patient_id", nullable = false, unique = true)
+    @Column(name = "patient_id", nullable = false)
     private Integer patientId;
     
-    @Column(name = "consulting_room_id", nullable = false, unique = true)
+    @Column(name = "consulting_room_id", nullable = false)
     private Integer consultingRoomId;
     
     @Column(name="date_time", nullable = false)

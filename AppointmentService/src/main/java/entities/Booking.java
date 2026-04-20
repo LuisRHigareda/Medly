@@ -27,7 +27,7 @@ public class Booking implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    @Column(name = "patient_id", nullable = false, unique = true)
+    @Column(name = "patient_id", nullable = false)
     private Integer patientId;
     
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)

@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
             "services",
             "repositories",
             "soapControllers",
+            "soapExceptions",
             "wsConfig"
         })
 @EnableJpaRepositories(basePackages = "repositories")
