@@ -13,7 +13,7 @@ public class BookingDTO {
     
     private AppointmentDTO appointment;
     
-    private Integer referenceNumber;
+    private Long referenceNumber;
     
     private BookingStatus status;
 
@@ -23,7 +23,7 @@ public class BookingDTO {
             Integer id, 
             Integer patientId, 
             AppointmentDTO appointment, 
-            Integer referenceNumber, 
+            Long referenceNumber, 
             BookingStatus status
     ) {
         this.id = id;
@@ -45,9 +45,9 @@ public class BookingDTO {
 
     public void setAppointment(AppointmentDTO appointment) {this.appointment = appointment;}
 
-    public Integer getReferenceNumber() {return referenceNumber;}
+    public Long getReferenceNumber() {return referenceNumber;}
 
-    public void setReferenceNumber(Integer referenceNumber) {this.referenceNumber = referenceNumber;}
+    public void setReferenceNumber(Long referenceNumber) {this.referenceNumber = referenceNumber;}
 
     public BookingStatus getStatus() {return status;}
 

@@ -4,13 +4,22 @@ import dtos.BookingDTO;
 import enums.BookingStatus;
 import java.time.LocalDate;
 import java.util.List;
+import mx.edu.itson.soap.appointments.AddAppointmentRequest;
+import mx.edu.itson.soap.appointments.AddAppointmentResponse;
+import mx.edu.itson.soap.appointments.CancelAppointmentRequest;
+import mx.edu.itson.soap.appointments.CancelAppointmentResponse;
+import mx.edu.itson.soap.appointments.ConfirmAppointmentRequest;
+import mx.edu.itson.soap.appointments.ConfirmAppointmentResponse;
 
 /**
  * Appointment Service contract.
  * @author Leonardo Flores Leyva - 252390
  */
 public interface IAppointmentService {
-    
+    // Operations
+    public AddAppointmentResponse addAppointment(AddAppointmentRequest request);
+    public ConfirmAppointmentResponse confirmAppointment(ConfirmAppointmentRequest request);
+    public CancelAppointmentResponse cancelAppointment(CancelAppointmentRequest request);
     // Queries
     public BookingDTO getBookingById(Integer id);
     public BookingDTO getBookingByReferenceNumber(Integer reference);

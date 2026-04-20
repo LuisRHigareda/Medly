@@ -1,0 +1,57 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:tns="http://itson.edu.mx/soap/appointments"
+           targetNamespace="http://itson.edu.mx/soap/appointments" 
+           elementFormDefault="qualified">
+
+    <xs:element name="AddAppointmentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="patientId" type="xs:int"/>
+                <xs:element name="consultingRoomId" type="xs:int"/>
+                <xs:element name="dateTime" type="xs:dateTime"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="AddAppointmentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="successMessage" type="xs:string"/>
+                <xs:element name="appointmentCreatedDateTime" type="xs:dateTime"/>
+                <xs:element name="referenceNumber" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="CancelAppointmentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="appointmentId" type="xs:int"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="CancelAppointmentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="successMessage" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="ConfirmAppointmentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="appointmentId" type="xs:int"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="ConfirmAppointmentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="successMessage" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

@@ -1,6 +1,7 @@
 package entities;
 
 import enums.BookingStatus;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,12 +30,12 @@ public class Booking implements Serializable {
     @Column(name = "patient_id", nullable = false, unique = true)
     private Integer patientId;
     
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id", nullable = false, unique = true)
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_appointment", nullable = false, unique = true)
     private Appointment appointment;
     
     @Column(name = "reference_number", nullable = false, unique = true)
-    private Integer referenceNumber;
+    private Long referenceNumber;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,7 +46,7 @@ public class Booking implements Serializable {
     public Booking(
             Integer patientId, 
             Appointment appointment, 
-            Integer referenceNumber, 
+            Long referenceNumber, 
             BookingStatus status
     ) {
         this.patientId = patientId;
@@ -58,7 +59,7 @@ public class Booking implements Serializable {
             Integer id, 
             Integer patientId, 
             Appointment appointment, 
-            Integer referenceNumber, 
+            Long referenceNumber, 
             BookingStatus status
     ) {
         this.id = id;
@@ -80,9 +81,9 @@ public class Booking implements Serializable {
 
     public void setAppointment(Appointment appointment) {this.appointment = appointment;}
 
-    public Integer getReferenceNumber() {return referenceNumber;}
+    public Long getReferenceNumber() {return referenceNumber;}
 
-    public void setReferenceNumber(Integer referenceNumber) {this.referenceNumber = referenceNumber;}
+    public void setReferenceNumber(Long referenceNumber) {this.referenceNumber = referenceNumber;}
 
     public BookingStatus getStatus() {return status;}
 
