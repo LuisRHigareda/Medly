@@ -2,7 +2,7 @@
 main.py
 -------
 Entry point for MedicalRecordService.
-Creates the FastAPI application instance and registers the base routes.
+Creates the FastAPI application instance and registers all routers.
 
 This service is part of the Medly microservices system and is responsible
 for managing clinical data: medical records, diagnoses, allergies,
@@ -14,9 +14,18 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from app.database.session import get_db
+from app.routers import medical_record, diagnosis, allergy, medication, prescribed_medication, medical_procedure
 
 # Create the FastAPI application instance
 app = FastAPI(title="MedicalRecordService")
+
+# Register routers — each one handles a group of related endpoints
+app.include_router(medical_record.router)
+app.include_router(diagnosis.router)
+app.include_router(allergy.router)
+app.include_router(medication.router)
+app.include_router(prescribed_medication.router)
+app.include_router(medical_procedure.router)
 
 
 @app.get("/")

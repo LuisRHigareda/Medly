@@ -12,10 +12,9 @@ Schemas in this file:
 """
 
 from datetime import datetime
-from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class MedicalRecordBase(BaseModel):
@@ -28,8 +27,10 @@ class MedicalRecordBase(BaseModel):
     patient_id: int                        # external reference to UserService
     notes: Optional[str] = None
     blood_type_id: Optional[int] = None   # references blood_type.id (1–8)
-    weight: Optional[Decimal] = None      # in kilograms
-    height: Optional[Decimal] = None      # in meters
+
+    # Field() sets max digits and decimal places to match the DB column DECIMAL(5,2)
+    weight: Optional[float] = Field(default=None, ge=0, le=999.99, description="Weight in kilograms")
+    height: Optional[float] = Field(default=None, ge=0, le=9.99, description="Height in meters")
 
 
 class MedicalRecordCreate(MedicalRecordBase):

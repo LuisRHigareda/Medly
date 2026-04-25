@@ -12,10 +12,9 @@ Schemas in this file:
 """
 
 from datetime import date
-from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PrescribedMedicationBase(BaseModel):
@@ -23,8 +22,8 @@ class PrescribedMedicationBase(BaseModel):
 
     medical_record_id: int                  # the record this prescription belongs to
     medication_id: int                      # references medication catalog
-    frequency: Optional[int] = None        # times per day (e.g. 3 = three times a day)
-    dose: Optional[Decimal] = None         # dose amount (e.g. 500.00 for 500mg)
+    frequency: Optional[int] = Field(default=None, ge=1, le=255, description="Times per day")
+    dose: Optional[float] = Field(default=None, ge=0, le=9999.99, description="Dose amount in mg")
     start_date: date                        # first day of treatment
     end_date: Optional[date] = None        # last day of treatment — None if ongoing
 
