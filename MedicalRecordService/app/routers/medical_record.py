@@ -6,17 +6,22 @@ A medical record is the core entity of this service — all other clinical
 data (diagnoses, allergies, medications, procedures) links back to it.
 
 Endpoints:
-- POST   /medical-records/                          Create a new medical record
-- GET    /medical-records/{record_id}               Get a record by its ID
-- GET    /medical-records/patient/{patient_id}      Get all records for a patient
+- POST   /medical-records/                              Create a new medical record
+- GET    /medical-records/{record_id}                   Get a record by its ID
+- GET    /medical-records/patient/{patient_id}          Get all records for a patient
+- GET    /medical-records/{record_id}/prescription      Download a PDF prescription
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi.responses import Response
+from sqlalchemy.orm import Session, joinedload
 
 from app.database.session import get_db
 from app.models.medical_record import MedicalRecord
+from app.models.diagnosis import Diagnosis
+from app.models.prescribed_medication import PrescribedMedication
 from app.schemas.medical_record import MedicalRecordCreate, MedicalRecordResponse
+from app.utils.pdf_generator import build_prescription_pdf
 
 # Create a router with a shared prefix and tag for API docs
 router = APIRouter(
@@ -73,3 +78,48 @@ def get_records_by_patient(patient_id: int, db: Session = Depends(get_db)):
     records = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_id).all()
 
     return records
+
+
+@router.get("/{record_id}/prescription")
+def get_prescription_pdf(record_id: int, db: Session = Depends(get_db)):
+    """
+    Generate and download a PDF prescription for a medical record.
+
+    Eagerly loads all related entities (blood type, diagnoses with status,
+    allergies, prescribed medications with medication name, and procedures)
+    in a single query to avoid N+1 problems, then delegates PDF construction
+    to build_prescription_pdf().
+
+    Returns the PDF as an inline attachment with content-type application/pdf.
+    Returns 404 if no record with the given ID exists.
+    """
+    # Eagerly load all relationships so the PDF generator can access them
+    # without triggering extra queries after the session is used
+    db_record = (
+        db.query(MedicalRecord)
+        .options(
+            joinedload(MedicalRecord.blood_type),
+            joinedload(MedicalRecord.diagnoses).joinedload(Diagnosis.status),
+            joinedload(MedicalRecord.allergies),
+            joinedload(MedicalRecord.prescribed_medications).joinedload(PrescribedMedication.medication),
+            joinedload(MedicalRecord.procedures),
+        )
+        .filter(MedicalRecord.id == record_id)
+        .first()
+    )
+
+    if db_record is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Medical record with id {record_id} not found"
+        )
+
+    pdf_bytes = build_prescription_pdf(db_record)
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename=prescription_{record_id}.pdf"
+        },
+    )

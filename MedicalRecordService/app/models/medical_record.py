@@ -27,8 +27,9 @@ class MedicalRecord(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # External reference to the patient in UserService — no FK constraint
+    # External references to UserService — no FK constraints
     patient_id = Column(Integer, nullable=False)
+    doctor_id  = Column(Integer, nullable=False)
 
     notes = Column(Text, nullable=True)
 

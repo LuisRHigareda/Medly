@@ -25,6 +25,7 @@ class MedicalRecordBase(BaseModel):
     """
 
     patient_id: int                        # external reference to UserService
+    doctor_id: int                         # external reference to UserService
     notes: Optional[str] = None
     blood_type_id: Optional[int] = None   # references blood_type.id (1–8)
 
