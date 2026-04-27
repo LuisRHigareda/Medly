@@ -7,8 +7,7 @@ ACTIVE, RESOLVED, CHRONIC, IN_TREATMENT.
 Rows are pre-seeded in the database via SQL INSERT statements.
 """
 
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy import Column, String, SmallInteger
 from sqlalchemy.orm import relationship
 
 from app.database.base import Base
@@ -23,7 +22,7 @@ class DiagnosisStatus(Base):
 
     __tablename__ = "diagnosis_status"
 
-    id = Column(TINYINT, primary_key=True, autoincrement=True)
+    id = Column(SmallInteger, primary_key=True, autoincrement=True)
     status_name = Column(String(30), nullable=False, unique=True)
 
     # One status can be assigned to many diagnoses

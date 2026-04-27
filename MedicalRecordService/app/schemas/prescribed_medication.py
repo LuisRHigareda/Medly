@@ -14,7 +14,7 @@ Schemas in this file:
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PrescribedMedicationBase(BaseModel):
@@ -43,7 +43,6 @@ class PrescribedMedicationResponse(PrescribedMedicationBase):
     Adds the auto-generated id field.
     """
 
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int

@@ -6,8 +6,7 @@ Acts as a lookup/enum table with the 8 standard blood types.
 Rows are pre-seeded in the database via SQL INSERT statements.
 """
 
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy import Column, String, SmallInteger
 from sqlalchemy.orm import relationship
 
 from app.database.base import Base
@@ -22,7 +21,7 @@ class BloodType(Base):
 
     __tablename__ = "blood_type"
 
-    id = Column(TINYINT, primary_key=True, autoincrement=True)
+    id = Column(SmallInteger, primary_key=True, autoincrement=True)
     type_name = Column(String(5), nullable=False, unique=True)
 
     # One blood type can appear in many medical records

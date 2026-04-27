@@ -11,7 +11,7 @@ Schemas in this file:
 - MedicationResponse : output — what the API returns
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class MedicationBase(BaseModel):
@@ -34,7 +34,6 @@ class MedicationResponse(MedicationBase):
     Adds the auto-generated id field.
     """
 
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int

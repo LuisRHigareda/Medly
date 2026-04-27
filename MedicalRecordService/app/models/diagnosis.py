@@ -6,8 +6,7 @@ A diagnosis belongs to a medical record and has an optional status
 (ACTIVE, RESOLVED, CHRONIC, IN_TREATMENT) from the diagnosis_status table.
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy import Column, Integer, SmallInteger, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database.base import Base
@@ -27,7 +26,7 @@ class Diagnosis(Base):
     diagnosed_date = Column(DateTime, nullable=False)
 
     # FK to diagnosis_status lookup table (optional)
-    status_id = Column(TINYINT, ForeignKey("diagnosis_status.id"), nullable=True)
+    status_id = Column(SmallInteger, ForeignKey("diagnosis_status.id"), nullable=True)
 
     # --- Relationships ---
     medical_record = relationship("MedicalRecord", back_populates="diagnoses")

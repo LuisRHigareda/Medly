@@ -12,7 +12,7 @@ Schemas in this file:
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class DiagnosisBase(BaseModel):
@@ -39,7 +39,6 @@ class DiagnosisResponse(DiagnosisBase):
     Adds the auto-generated id field.
     """
 
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int

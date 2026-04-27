@@ -9,8 +9,7 @@ Note: patient_id is stored as a plain integer with no foreign key constraint
 because the Patient entity belongs to UserService (a separate database).
 """
 
-from sqlalchemy import Column, Integer, Text, DECIMAL, DateTime, ForeignKey, func
-from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy import Column, Integer, SmallInteger, Text, DECIMAL, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 
 from app.database.base import Base
@@ -34,7 +33,7 @@ class MedicalRecord(Base):
     notes = Column(Text, nullable=True)
 
     # FK to blood_type lookup table
-    blood_type_id = Column(TINYINT, ForeignKey("blood_type.id"), nullable=True)
+    blood_type_id = Column(SmallInteger, ForeignKey("blood_type.id"), nullable=True)
 
     weight = Column(DECIMAL(5, 2), nullable=True)   # in kilograms
     height = Column(DECIMAL(5, 2), nullable=True)   # in meters
