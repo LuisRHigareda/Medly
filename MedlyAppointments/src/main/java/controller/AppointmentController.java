@@ -1,5 +1,6 @@
 package controller;
 
+import contract.IWebService;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author Leonardo Flores Leyva
  */
 @Controller
-@RequestMapping("/new")
+@RequestMapping("/schedule")
 public class AppointmentController {
+    
+    private final IWebService webService;
+    
+    public AppointmentController(IWebService webService){
+        this.webService = webService;
+    }
     
     @GetMapping
     public void redirect(HttpSession session){
@@ -75,7 +82,7 @@ public class AppointmentController {
         return (userId != null && consultingRoomId != null) ? "datetime" : "redirect:/doctor";
     }
     
-    @PostMapping("/register")
+    @PostMapping("/submit")
     public String registerForm(
             HttpSession session,
             @RequestParam("datetime") LocalDateTime dateTime
@@ -84,6 +91,7 @@ public class AppointmentController {
             // All attributes must be present by this point
             Integer userId = (Integer) session.getAttribute("user");
             Integer consultingRoomId = (Integer) session.getAttribute("consulting_room");
+            
             // Tries to register the new appointment in the appointment service...
             return "redirect:/register";
         } else

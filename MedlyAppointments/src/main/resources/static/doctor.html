@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>TODO supply a title</title>
+        <title>Doctor</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <div>TODO write content</div>
+        <h1>Appointment's Consulting Room</h1>
+        <h2>Select the desired consulting room or doctor:</h2>
+        <form action="/doctor" method="post">
+            <label for="consulting_room">Choose a doctor:</label>
+            <select name="consulting_room" id="consulting_room">
+                <option value="1">Room 1: Dr. Smith</option>
+                <option value="2">Room 2: Dr. Johnson</option>
+                <option value="3">Room 3: Dr. Lee</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
     </body>
 </html>

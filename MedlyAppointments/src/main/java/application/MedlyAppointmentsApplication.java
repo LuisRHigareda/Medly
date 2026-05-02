@@ -6,7 +6,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(
         scanBasePackages = {
             "controller",
-            "model"
+            "model",
+            "contract",
+            "service",
+            "exceptions",
+            "wsc"
         }
 )
 public class MedlyAppointmentsApplication {
