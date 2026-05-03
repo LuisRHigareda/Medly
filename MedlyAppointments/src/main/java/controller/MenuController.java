@@ -16,9 +16,6 @@ public class MenuController {
     @GetMapping
     public String showMenu(HttpSession session){
         Integer userId = (Integer) session.getAttribute("user");
-        if(userId == null)
-            return "redirect:/index";
-        else
-            return "menu";
+        return (userId == null) ? "redirect:/index" : "home";
     }
 }

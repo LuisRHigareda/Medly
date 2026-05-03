@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author Leonardo Flores Leyva
  */
 @Controller
-@RequestMapping(path = {"/index", ""})
+@RequestMapping(path = {"/index", "/"})
 public class HomeController {
     /**
      * Retrieves the home page. If the user is logged in,
@@ -23,24 +23,23 @@ public class HomeController {
     @GetMapping
     public String showHome(HttpSession session) {
         Integer userId = (Integer) session.getAttribute("user");
-        if(userId == null)
-            return "index";
-        else
-            return "redirect:/menu";
+        return (userId == null) ? "index" : "redirect:/menu";
     }
     
-    @PostMapping
+    @PostMapping("/login")
     public String showMenu(
             HttpSession session,
-            @RequestParam("username") String username, 
+            @RequestParam("email") String email,
+            @RequestParam("affiliation_number") String affiliationNumber,
             @RequestParam("password") String password
     ){
-        if(username != null && password != null){
+        if((email != null || affiliationNumber != null) && password != null){
+            // This would be where the user's id is retrieved to later store it in the session...
             // Hardcoded for now...
             Integer userId = 1;
             session.setAttribute("user", userId);
             return "redirect:/menu";
         } else
-            return "redirect:/index";
+            return "redirect:/index?error=params_missing";
     }
 }

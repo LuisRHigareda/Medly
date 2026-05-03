@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Medly Appointments</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Welcome to Medly Appointments</h1>
+        <h2>Log in with your email/affiliation number and password:</h2>
+        <form action="/login" method="post">
+            <label>Email:</label>
+            <input type="email" name="email" maxlength="100">
+            <label>Affiliation Number:</label>
+            <input type="text" name="affiliation_number" maxlength="50">
+            <label>Enter your password:</label>
+            <input type="password" name="password" maxlength="20" required>
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>

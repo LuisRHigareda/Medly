@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>Doctor</title>
         <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <body>
         <h1>Appointment's Consulting Room</h1>
         <h2>Select the desired consulting room or doctor:</h2>
-        <form action="/doctor" method="post">
+        <form action="/schedule/doctor_submit" method="post" required>
             <label for="consulting_room">Choose a doctor:</label>
             <select name="consulting_room" id="consulting_room">
                 <option value="1">Room 1: Dr. Smith</option>
