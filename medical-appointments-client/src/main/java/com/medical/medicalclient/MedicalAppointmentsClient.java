@@ -1,16 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.medical.medicalclient;
-
+import com.medical.medicalclient.view.LoginFrame;
+import javax.swing.SwingUtilities;
 /**
- *
- * @author Yuri German Garcia
+ * @author Yuri German Garcia López - 252583
  */
 public class MedicalAppointmentsClient {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        SwingUtilities.invokeLater(() -> {
+            new LoginFrame().setVisible(true);
+        });
     }
 }
