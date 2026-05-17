@@ -6,6 +6,7 @@ com\medical\medicalclient\dto\PatientResponse.class
 com\medical\medicalclient\MedicalAppointmentsClient.class
 com\medical\medicalclient\dto\AddressResponse.class
 com\medical\medicalclient\dto\DoctorResponse.class
+com\medical\medicalclient\view\MainReceptionistFrame.class
 com\medical\medicalclient\dto\ReceptionistResponse.class
 com\medical\medicalclient\dto\LoginRequest.class
 com\medical\medicalclient\client\UserClient.class

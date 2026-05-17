@@ -112,7 +112,7 @@ public class LoginFrame extends JFrame{
 
             // Execute network request routing to the gateway context
             LoginResponse loginRes = authClient.login(email, password);
-
+            
             if (loginRes != null && loginRes.isSuccess()) {
                 String role = loginRes.getUserRole();
                 if ("RECEPTIONIST".equalsIgnoreCase(role)) {
@@ -124,7 +124,8 @@ public class LoginFrame extends JFrame{
                         JOptionPane.showMessageDialog(LoginFrame.this,
                                 "Welcome back, " + receptionist.getName() + "!\nClinic: " + receptionist.getClinicName(),
                                 "Login Successful", JOptionPane.INFORMATION_MESSAGE);
-                LoginFrame.this.dispose();
+                        MainReceptionistFrame mainFrame = new MainReceptionistFrame(receptionist);
+                        mainFrame.setVisible(true);
                     } else {
                         JOptionPane.showMessageDialog(LoginFrame.this,
                                 "Could not recover specific receptionist workspace metadata.",
