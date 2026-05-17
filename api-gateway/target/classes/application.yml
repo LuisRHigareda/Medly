@@ -9,12 +9,12 @@ spring:
     gateway:
       routes:
         - id: user-service-auth
-          uri: http://localhost:8081
+          uri: http://localhost:8091
           predicates:
             - Path=/api/auth/**
 
         - id: user-service-users
-          uri: http://localhost:8081
+          uri: http://localhost:8091
           predicates:
             - Path=/api/users/**
 
