@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Appointmment's Date and Time</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Appointment's Date and Time</h1>
+        <h2>Select the desired date and time for your appointment:</h2>
+        <form action="/schedule/submit" method="post">
+            <label for="datetime">Choose a date and time:</label>
+            <input type="datetime-local" id="datetime" name="datetime" required>
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>
