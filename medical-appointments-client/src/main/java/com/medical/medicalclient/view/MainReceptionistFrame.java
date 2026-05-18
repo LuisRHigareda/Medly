@@ -2,11 +2,14 @@ package com.medical.medicalclient.view;
 
 import com.medical.medicalclient.client.AppointmentClient;
 import com.medical.medicalclient.client.UserClient;
+import com.medical.medicalclient.dto.AppointmentResponse;
 import com.medical.medicalclient.dto.ReceptionistResponse;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
 import java.awt.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 /**
  * Main dashboard view for the Receptionist role
@@ -61,10 +64,11 @@ public class MainReceptionistFrame extends JFrame {
         setTitle("Medical Appointments Grid - Reception Desk: " + receptionistContext.getClinicName());
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Center on screen
+        setLocationRelativeTo(null);
         setMinimumSize(new Dimension(800, 500));
 
         initComponents();
+        loadDoctorCatalogPipeline();
     }
 
     /**
@@ -264,6 +268,7 @@ public class MainReceptionistFrame extends JFrame {
     
     /**
      * Inner class action handler responsible for capturing the patient lookup trigger
+     * Fetches live demographic and appointment records using explicit data mapping names
      */
     private class PatientSearchHandler implements java.awt.event.ActionListener {
         @Override
@@ -277,37 +282,64 @@ public class MainReceptionistFrame extends JFrame {
                 return;
             }
 
-            if (affiliation.equalsIgnoreCase("AFF-00123")) {
-                lblPatientName.setText("Name: Luis Coronado");
-                lblPatientPhone.setText("Phone: 6441234567");
-                lblPatientBirth.setText("Birthday: 1995-05-15");
-                
-                lblPatientStatus.setText("   INSURANCE ACTIVE   ");
-                lblPatientStatus.setBackground(new Color(46, 139, 87));
-                
-                tableModel.setRowCount(0);
-                tableModel.addRow(new Object[]{101, "Dr. Leonardo Flores", "Consultorio A-101", "2026-05-20", "09:00:00", "TO_BE_CONFIRMED"});
-                tableModel.addRow(new Object[]{102, "Dr. Leonardo Flores", "Consultorio A-101", "2026-06-14", "11:30:00", "CONFIRMED"});
-                
-                confirmAppointmentButton.setEnabled(true);
-                cancelAppointmentButton.setEnabled(true);
-                
-            } else {
-                lblPatientName.setText("Name: Patient Not Registered");
-                lblPatientPhone.setText("Phone: ---");
-                lblPatientBirth.setText("Birthday: ---");
-                
-                lblPatientStatus.setText("   INACTIVE VIGENCY   ");
-                lblPatientStatus.setBackground(new Color(178, 34, 34));
-                
-                tableModel.setRowCount(0);
-                confirmAppointmentButton.setEnabled(false);
-                cancelAppointmentButton.setEnabled(false);
-                
+            try {
+                var patient = userClient.getPatientByAffiliationNumber(affiliation);
+
+                if (patient != null) {
+                    lblPatientName.setText("Name: " + patient.getName() + " " + patient.getLastName());
+                    lblPatientPhone.setText("Phone: " + patient.getPhone());
+                    lblPatientBirth.setText("Birthday: " + (patient.getBirthday() != null ? patient.getBirthday().toString() : "---"));
+                    
+                    if (patient.getValidity() != null && patient.getValidity()) {
+                        lblPatientStatus.setText("   INSURANCE ACTIVE   ");
+                        lblPatientStatus.setBackground(new Color(46, 139, 87)); 
+                    } else {
+                        lblPatientStatus.setText("   INSURANCE INACTIVE   ");
+                        lblPatientStatus.setBackground(new Color(178, 34, 34));
+                    }
+                    
+                    tableModel.setRowCount(0);
+                    var appointments = appointmentClient.getAppointmentsByPatientAffiliation(affiliation);
+                    
+                    if (appointments != null && !appointments.isEmpty()) {
+                        for (var appt : appointments) {
+                            tableModel.addRow(new Object[]{
+                                appt.getId(),
+                                appt.getDoctorName(),
+                                appt.getConsultingRoomName(),
+                                appt.getDate() != null ? appt.getDate().toString() : "---",
+                                appt.getTime() != null ? appt.getTime().toString() : "---",
+                                appt.getStatus()
+                            });
+                        }
+                    }
+                    
+                    confirmAppointmentButton.setEnabled(true);
+                    cancelAppointmentButton.setEnabled(true);
+                    
+                } else {
+                    resetDemographicCard();
+                    JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                            "No active patient profile found matching the provided affiliation key.",
+                            "Registry Notice", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (Exception ex) {
+                resetDemographicCard();
                 JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "The entered affiliation record does not match an active file.",
-                        "Registry Warning", JOptionPane.INFORMATION_MESSAGE);
+                        "Network handshake failure while contacting User/Appointment Cluster.\nDetails: " + ex.getMessage(),
+                        "Distributed System Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+        
+        private void resetDemographicCard() {
+            lblPatientName.setText("Name: Patient Not Found");
+            lblPatientPhone.setText("Phone: ---");
+            lblPatientBirth.setText("Birthday: ---");
+            lblPatientStatus.setText("   NO DATA LOADED   ");
+            lblPatientStatus.setBackground(Color.LIGHT_GRAY);
+            tableModel.setRowCount(0);
+            confirmAppointmentButton.setEnabled(false);
+            cancelAppointmentButton.setEnabled(false);
         }
     }
     
@@ -398,25 +430,9 @@ public class MainReceptionistFrame extends JFrame {
             Date selectedDate = dateChooser.getDate();
             String targetTime = (String) timeComboBox.getSelectedItem();
 
-            // Structural Field Constraint Validation Checks
-            if (affiliation.isEmpty()) {
+            if (affiliation.isEmpty() || selectedDoctorIndex == 0 || selectedDate == null) {
                 JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "Please provide a valid Patient Affiliation Number to secure the slot.",
-                        "Validation Constraint", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (selectedDoctorIndex == 0) {
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "Please select an operational Medical Staff Doctor from the dropdown roster.",
-                        "Validation Constraint", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // CAMBIO: Validación para comprobar que el calendario tenga una fecha seleccionada
-            if (selectedDate == null) {
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "Please select a target execution date using the calendar view component.",
+                        "Please satisfy all required fields before committing the booking manifestation.",
                         "Validation Constraint", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -424,11 +440,9 @@ public class MainReceptionistFrame extends JFrame {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String targetDate = sdf.format(selectedDate);
 
-            // Extract real selected text contents for the confirmation readout screen
             String selectedDoctorName = (String) doctorComboBox.getSelectedItem();
             String targetRoom = roomField.getText();
 
-            // Display an explicit transactional preview handshake to the staff operator
             String orderReceiptSummary = "Appointment Scheduling Preview Manifest:\n\n"
                     + "• Patient Affiliation: " + affiliation + "\n"
                     + "• Staff Practitioner: " + selectedDoctorName + "\n"
@@ -442,17 +456,60 @@ public class MainReceptionistFrame extends JFrame {
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
             if (operationChoice == JOptionPane.YES_OPTION) {
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "The transaction has been successfully committed!\n"
-                        + "A new medical appointment record was registered under the distributed network cluster.",
-                        "Transaction Complete", JOptionPane.INFORMATION_MESSAGE);
-                
-                // Reset fields
-                bookPatientAffiliationField.setText("");
-                doctorComboBox.setSelectedIndex(0);
-                dateChooser.setDate(new Date()); 
-                timeComboBox.setSelectedIndex(0);
+                try {
+                    // Instantiate real AppointmentResponse data transfer payload
+                    AppointmentResponse newBooking = new AppointmentResponse();
+                    
+                    newBooking.setDoctorName(selectedDoctorName);
+                    newBooking.setDoctorId(1);
+                    newBooking.setConsultingRoomId(101);
+                    newBooking.setConsultingRoomName(targetRoom); 
+                    
+                    newBooking.setDate(LocalDate.parse(targetDate));
+                    newBooking.setTime(LocalTime.parse(targetTime));
+                    newBooking.setStatus("TO_BE_CONFIRMED");
+
+                    // Execute live HTTP POST request through the AppointmentClient pipeline
+                    boolean creationSuccess = appointmentClient.bookAppointment(newBooking);
+
+                    if (creationSuccess) {
+                        JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                                "Excellent! The new medical appointment was successfully provisioned into MySQL.",
+                                "Booking Secured", JOptionPane.INFORMATION_MESSAGE);
+                        
+                        bookPatientAffiliationField.setText("");
+                        doctorComboBox.setSelectedIndex(0);
+                        dateChooser.setDate(new Date());
+                        timeComboBox.setSelectedIndex(0);
+                    } else {
+                        JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                                "The server rejected the appointment insertion. Verify slot availability.",
+                                "Booking Rejected", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                            "Failed to write new record into the microservices engine.\nDetails: " + ex.getMessage(),
+                            "Network Payload Failure", JOptionPane.ERROR_MESSAGE);
+                }
             }
+        }
+    }
+    
+    /**
+     * Queries the UserClient microservice cluster to populate the doctor dropdown roster dynamically
+     */
+    private void loadDoctorCatalogPipeline() {
+        try {
+            var doctors = userClient.findAllDoctors();
+            if (doctors != null && !doctors.isEmpty()) {
+                doctorComboBox.removeAllItems();
+                doctorComboBox.addItem("-- Select Doctor --");
+                for (var doc : doctors) {
+                    doctorComboBox.addItem("Dr. " + doc.getName() + " " + doc.getLastName() + " (" + doc.getSpecialization()+ ")");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Fallback trigger activated: Core doctor catalogue connection unreachable. " + e.getMessage());
         }
     }
 }
