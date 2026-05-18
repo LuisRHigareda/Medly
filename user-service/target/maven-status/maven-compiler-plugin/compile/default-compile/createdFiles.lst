@@ -9,6 +9,7 @@ com\medical\userservice\model\UserType.class
 com\medical\userservice\repository\PatientRepository.class
 com\medical\userservice\repository\DoctorRepository.class
 com\medical\userservice\dto\AddressResponse.class
+com\medical\userservice\controller\UserController.class
 com\medical\userservice\repository\ReceptionistRepository.class
 com\medical\userservice\service\AuthService.class
 com\medical\userservice\controller\AuthController.class

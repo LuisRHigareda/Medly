@@ -1,7 +1,11 @@
 package com.medical.userservice.controller;
 
+import com.medical.userservice.dto.LoginRequest;
+import com.medical.userservice.dto.LoginResponse;
+import com.medical.userservice.service.AuthService;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,24 +13,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class AuthController {
 
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
     @PostMapping("/auth/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String password = request.get("password");
-
-        Map<String, Object> response = new HashMap<>();
-
-        if ("admin@demo.com".equals(email) && "1234".equals(password)) {
-            response.put("success", true);
-            response.put("message", "Login successful");
-            response.put("userRole", "PATIENT");
-            response.put("email", email);
-            return ResponseEntity.ok(response);
-        }
-
-        response.put("success", false);
-        response.put("message", "Invalid credentials");
-        return ResponseEntity.status(401).body(response);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        return authService.login(request)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new LoginResponse(false, "Invalid credentials", null, null, null)));
     }
 
     @GetMapping("/users/ping")

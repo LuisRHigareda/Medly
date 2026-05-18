@@ -344,132 +344,135 @@ public class MainReceptionistFrame extends JFrame {
     }
     
     /**
-     * Inner class action handler managing the arrival confirmation state machine logic
+     * Inner class action handler managing the arrival confirmation state machine logic.
+     * Routes directly to PUT /api/appointments/confirm/{id}
      */
     private class ConfirmAppointmentHandler implements java.awt.event.ActionListener {
         @Override
         public void actionPerformed(java.awt.event.ActionEvent e) {
             int selectedRow = appointmentsTable.getSelectedRow();
-            
-            if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "Please select an active appointment entry from the table grid first.",
-                        "Selection Required", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+            if (selectedRow == -1) return;
 
             Integer appointmentId = (Integer) tableModel.getValueAt(selectedRow, 0);
             String currentStatus = (String) tableModel.getValueAt(selectedRow, 5);
 
             if ("CONFIRMED".equalsIgnoreCase(currentStatus)) {
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "This appointment slot has already been marked as CONFIRMED.",
-                        "Operation Redundant", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this, "This slot is already CONFIRMED.", "Notice", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
             int confirmChoice = JOptionPane.showConfirmDialog(MainReceptionistFrame.this,
-                    "Are you sure you want to confirm patient arrival for Appointment ID: " + appointmentId + "?",
-                    "Confirm Arrival Handshake", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    "Confirm patient arrival for Appointment ID: " + appointmentId + "?",
+                    "PUT - Confirm Handshake", JOptionPane.YES_NO_OPTION);
 
             if (confirmChoice == JOptionPane.YES_OPTION) {
-                tableModel.setValueAt("CONFIRMED", selectedRow, 5);
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "Patient arrival checked in successfully. Appointment status shifted to CONFIRMED.",
-                        "Transaction Complete", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    // LLAMADA HTTP PUT REAL AL SERVIDOR
+                    boolean success = appointmentClient.confirmAppointment(appointmentId);
+                    if (success) {
+                        tableModel.setValueAt("CONFIRMED", selectedRow, 5);
+                        JOptionPane.showMessageDialog(MainReceptionistFrame.this, "Status shifted to CONFIRMED in database!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(MainReceptionistFrame.this, "Network Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }
 
     /**
-     * Inner class action handler managing transaction slot cancellation boundaries
+     * Inner class action handler managing transaction slot cancellation boundaries.
+     * Routes directly to PUT /api/appointments/cancel/{id}
      */
     private class CancelAppointmentHandler implements java.awt.event.ActionListener {
         @Override
         public void actionPerformed(java.awt.event.ActionEvent e) {
             int selectedRow = appointmentsTable.getSelectedRow();
-            
-            if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "Please select an active appointment entry from the table grid first.",
-                        "Selection Required", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+            if (selectedRow == -1) return;
 
             Integer appointmentId = (Integer) tableModel.getValueAt(selectedRow, 0);
             String currentStatus = (String) tableModel.getValueAt(selectedRow, 5);
 
             if ("CANCELED".equalsIgnoreCase(currentStatus)) {
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "This appointment entry is already registered as CANCELED.",
-                        "Operation Redundant", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this, "This entry is already CANCELED.", "Notice", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
             int confirmChoice = JOptionPane.showConfirmDialog(MainReceptionistFrame.this,
-                    "Warning: Are you sure you want to CANCEL Appointment ID: " + appointmentId + "?\nThis will free up the time slot.",
-                    "Cancel Appointment Request", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    "Are you sure you want to CANCEL Appointment ID: " + appointmentId + "?",
+                    "PUT - Cancel Request", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (confirmChoice == JOptionPane.YES_OPTION) {
-                tableModel.setValueAt("CANCELED", selectedRow, 5);
-                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "The appointment slot has been successfully revoked and marked as CANCELED.",
-                        "Transaction Revoked", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    // LLAMADA HTTP PUT REAL AL SERVIDOR
+                    boolean success = appointmentClient.cancelAppointment(appointmentId);
+                    if (success) {
+                        tableModel.setValueAt("CANCELED", selectedRow, 5);
+                        JOptionPane.showMessageDialog(MainReceptionistFrame.this, "The appointment slot has been successfully revoked.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(MainReceptionistFrame.this, "Network Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
-   }
+    }
     
     /**
-     * Inner class action handler responsible for capturing new scheduling submissions
+     * Inner class action handler responsible for capturing new scheduling submissions.
+     * Maps real UI selections into a clean JSON structure without hardcoded IDs.
      */
     private class ScheduleAppointmentHandler implements java.awt.event.ActionListener {
         @Override
         public void actionPerformed(java.awt.event.ActionEvent e) {
             String affiliation = bookPatientAffiliationField.getText().trim();
             int selectedDoctorIndex = doctorComboBox.getSelectedIndex();
-            Date selectedDate = dateChooser.getDate();
+            java.util.Date selectedDate = dateChooser.getDate();
             String targetTime = (String) timeComboBox.getSelectedItem();
 
             if (affiliation.isEmpty() || selectedDoctorIndex == 0 || selectedDate == null) {
                 JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                        "Please satisfy all required fields before committing the booking manifestation.",
+                        "Please satisfy all required fields before committing the booking.",
                         "Validation Constraint", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String targetDate = sdf.format(selectedDate);
+            try {
+                // 1. OBTENER EL PACIENTE REAL (Para quitar el ID quemado)
+                var patient = userClient.getPatientByAffiliationNumber(affiliation);
+                if (patient == null) {
+                    JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                            "Cannot book appointment: Patient affiliation registry not found.",
+                            "Payload Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-            String selectedDoctorName = (String) doctorComboBox.getSelectedItem();
-            String targetRoom = roomField.getText();
+                // 2. OBTENER EL DOCTOR REAL (De la lista descargada del backend)
+                var doctorsList = userClient.findAllDoctors();
+                // Restamos 1 porque el índice 0 del combo es el mensaje "-- Select Doctor --"
+                var selectedDoctor = doctorsList.get(selectedDoctorIndex - 1);
 
-            String orderReceiptSummary = "Appointment Scheduling Preview Manifest:\n\n"
-                    + "• Patient Affiliation: " + affiliation + "\n"
-                    + "• Staff Practitioner: " + selectedDoctorName + "\n"
-                    + "• Facility Room Hub: " + targetRoom + "\n"
-                    + "• Target Execution Date: " + targetDate + "\n"
-                    + "• Assigned Shift Time: " + targetTime + "\n\n"
-                    + "Do you authorize routing this record modification to the AppointmentService?";
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                String targetDate = sdf.format(selectedDate);
 
-            int operationChoice = JOptionPane.showConfirmDialog(MainReceptionistFrame.this,
-                    orderReceiptSummary, "Authorize Network Booking Transaction",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                int operationChoice = JOptionPane.showConfirmDialog(MainReceptionistFrame.this,
+                        "Authorize routing this new appointment allocation to the backend production database?",
+                        "Authorize Transaction", JOptionPane.YES_NO_OPTION);
 
-            if (operationChoice == JOptionPane.YES_OPTION) {
-                try {
-                    // Instantiate real AppointmentResponse data transfer payload
+                if (operationChoice == JOptionPane.YES_OPTION) {
+                    // 3. CONSTRUCCIÓN DEL JSON REAL MEDIANTE TU DTO
                     AppointmentResponse newBooking = new AppointmentResponse();
                     
-                    newBooking.setDoctorName(selectedDoctorName);
-                    newBooking.setDoctorId(1);
-                    newBooking.setConsultingRoomId(101);
-                    newBooking.setConsultingRoomName(targetRoom); 
+                    newBooking.setPatientId(patient.getId()); // ID Real del paciente consultado
+                    newBooking.setDoctorId(selectedDoctor.getId()); // ID Real del doctor
+                    newBooking.setDoctorName(selectedDoctor.getName() + " " + selectedDoctor.getLastName());
+                    newBooking.setConsultingRoomId(selectedDoctor.getConsultingRoomId()); // ID Real del consultorio del doctor
+                    newBooking.setConsultingRoomName(selectedDoctor.getConsultingRoom());
                     
-                    newBooking.setDate(LocalDate.parse(targetDate));
-                    newBooking.setTime(LocalTime.parse(targetTime));
+                    newBooking.setDate(java.time.LocalDate.parse(targetDate));
+                    newBooking.setTime(java.time.LocalTime.parse(targetTime));
                     newBooking.setStatus("TO_BE_CONFIRMED");
 
-                    // Execute live HTTP POST request through the AppointmentClient pipeline
+                    // Enviar POST real al microservicio
                     boolean creationSuccess = appointmentClient.bookAppointment(newBooking);
 
                     if (creationSuccess) {
@@ -479,18 +482,17 @@ public class MainReceptionistFrame extends JFrame {
                         
                         bookPatientAffiliationField.setText("");
                         doctorComboBox.setSelectedIndex(0);
-                        dateChooser.setDate(new Date());
-                        timeComboBox.setSelectedIndex(0);
+                        dateChooser.setDate(new java.util.Date());
                     } else {
                         JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                                "The server rejected the appointment insertion. Verify slot availability.",
-                                "Booking Rejected", JOptionPane.ERROR_MESSAGE);
+                                "The distributed cluster rejected the insertion slot.",
+                                "Transaction Failure", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(MainReceptionistFrame.this,
-                            "Failed to write new record into the microservices engine.\nDetails: " + ex.getMessage(),
-                            "Network Payload Failure", JOptionPane.ERROR_MESSAGE);
                 }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                        "Network payload allocation failure:\n" + ex.getMessage(),
+                        "Distributed System Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

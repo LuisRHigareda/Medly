@@ -45,6 +45,13 @@ public class UserQueryService {
         return receptionistRepository.findById(id).map(this::toReceptionistResponse);
     }
 
+    @Transactional
+    public Optional<ReceptionistResponse> findReceptionistByUserIdOrId(Integer id) {
+        return receptionistRepository.findByUserId(id)
+                .or(() -> receptionistRepository.findById(id))
+                .map(this::toReceptionistResponse);
+    }
+
     public boolean patientExists(Integer id) {
         return patientRepository.existsById(id);
     }
@@ -95,16 +102,29 @@ public class UserQueryService {
     }
 
     private ReceptionistResponse toReceptionistResponse(Receptionist receptionist) {
-        Clinic clinic = receptionist.getClinic();
+        Integer userId = null;
+        String email = null;
+        Integer clinicId = null;
+        String clinicName = "Sin Clínica";
+
+        if (receptionist.getUser() != null) {
+            userId = receptionist.getUser().getId();
+            email = receptionist.getUser().getEmail();
+        }
+
+        if (receptionist.getClinic() != null) {
+            clinicId = receptionist.getClinic().getId();
+            clinicName = receptionist.getClinic().getName();
+        }
 
         return new ReceptionistResponse(
                 receptionist.getId(),
-                receptionist.getUser().getId(),
-                receptionist.getUser().getEmail(),
+                userId,
+                email,
                 receptionist.getName(),
                 receptionist.getLastName(),
-                clinic.getId(),
-                clinic.getName()
+                clinicId,
+                clinicName
         );
     }
 }

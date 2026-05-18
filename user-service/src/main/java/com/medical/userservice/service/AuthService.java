@@ -21,9 +21,16 @@ public class AuthService {
             return Optional.empty();
         }
 
-        Optional<User> user = userRepository.findByEmail(request.getEmail());
+        String email = request.getEmail().trim();
+        String password = request.getPassword();
 
-        if (user.isEmpty() || !user.get().getPassword().equals(request.getPassword())) {
+        if (email.isBlank() || password.isBlank()) {
+            return Optional.empty();
+        }
+
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty() || !user.get().getPassword().equals(password)) {
             return Optional.empty();
         }
 
