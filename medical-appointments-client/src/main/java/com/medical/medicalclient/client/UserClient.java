@@ -1,4 +1,5 @@
 package com.medical.medicalclient.client;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medical.medicalclient.dto.DoctorResponse;
 import com.medical.medicalclient.dto.PatientResponse;
@@ -10,9 +11,10 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+
 /**
  * Service client responsible for querying user, patient, and receptionist 
- * records from the user-service subsystem via the central API Gateway
+ * records from the user-service subsystem via the central API Gateway.
  * @author Yuri German Garcia López - 252583
  */
 public class UserClient {
@@ -35,9 +37,7 @@ public class UserClient {
 
     /**
      * Retrieves extended profile data for a specific receptionist by their ID.
-     * This is vital to extract the associated clinicId for context filtering.
-     * * @param id The inner user or receptionist primary identifier.
-     * @return A ReceptionistResponse DTO, or null if a network/parsing error occurs.
+     * Maps to: GET http://localhost:8080/api/users/receptionists/{id}
      */
     public ReceptionistResponse getReceptionistById(Integer id) {
         try {
@@ -63,13 +63,10 @@ public class UserClient {
 
     /**
      * Queries a patient's core files and validation status using their unique affiliation number.
-     * Used by the receptionist to find profiles before booking or confirming appointments.
-     * * @param affiliationNumber The health insurance/system identifier string.
-     * @return A PatientResponse DTO, or null if the resource is missing or unreachable.
+     * Maps to: GET http://localhost:8080/api/users/patients/{affiliationNumber}
      */
     public PatientResponse getPatientByAffiliationNumber(String affiliationNumber) {
         try {
-            // Note: The endpoint path handles filtering by affiliation string at the gateway routing level
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/patients/" + affiliationNumber))
                     .header("Accept", "application/json")
@@ -92,8 +89,7 @@ public class UserClient {
 
     /**
      * Fetches a complete collection of all registered medical doctors in the clinic grid.
-     * Useful for building dynamic dropdown lists (JComboBox) within scheduling forms.
-     * * @return A list of DoctorResponse DTOs, or an empty list if a failure triggers.
+     * Maps to: GET http://localhost:8080/api/users/doctors
      */
     public List<DoctorResponse> findAllDoctors() {
         try {
@@ -106,7 +102,6 @@ public class UserClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                // Read value into a generic collection type safely using Jackson java type factory
                 return objectMapper.readValue(response.body(), 
                         objectMapper.getTypeFactory().constructCollectionType(List.class, DoctorResponse.class));
             } else {
@@ -118,5 +113,4 @@ public class UserClient {
             return Collections.emptyList();
         }
     }
-    
 }
