@@ -16,4 +16,5 @@ com\medical\medicalclient\dto\LoginRequest.class
 com\medical\medicalclient\client\UserClient.class
 com\medical\medicalclient\dto\AppointmentResponse.class
 com\medical\medicalclient\view\LoginFrame.class
+com\medical\medicalclient\view\MainReceptionistFrame$ScheduleAppointmentHandler.class
 com\medical\medicalclient\client\JsonMapperConfig.class
