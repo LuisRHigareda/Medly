@@ -162,6 +162,9 @@ public class MainReceptionistFrame extends JFrame {
         confirmAppointmentButton = new JButton("Confirm Arrival");
         cancelAppointmentButton = new JButton("Cancel Slot");
        
+        confirmAppointmentButton.addActionListener(new ConfirmAppointmentHandler());
+        cancelAppointmentButton.addActionListener(new CancelAppointmentHandler());
+        
         confirmAppointmentButton.setEnabled(false);
         cancelAppointmentButton.setEnabled(false);
 
@@ -175,7 +178,7 @@ public class MainReceptionistFrame extends JFrame {
     }
 
     /**
-     * Factory placeholder layout setup for the scheduling form sheet tab.
+     * Factory placeholder layout setup for the scheduling form sheet tab
      */
     private JPanel createNewBookingTab() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -184,8 +187,8 @@ public class MainReceptionistFrame extends JFrame {
     }
     
     /**
-     * Inner class action handler responsible for capturing the patient lookup trigger.
-     * Populates the demographic profile card and synchronization grid with mock/live records.
+     * Inner class action handler responsible for capturing the patient lookup trigger
+     * Populates the demographic profile card and synchronization grid with mock/live records
      */
     private class PatientSearchHandler implements java.awt.event.ActionListener {
         @Override
@@ -221,7 +224,7 @@ public class MainReceptionistFrame extends JFrame {
                 lblPatientBirth.setText("Birthday: ---");
                 
                 lblPatientStatus.setText("   VIGENCIA INACTIVA   ");
-                lblPatientStatus.setBackground(new Color(178, 34, 34)); // FireBrick (Rojo)
+                lblPatientStatus.setBackground(new Color(178, 34, 34));
                 
                 tableModel.setRowCount(0);
                 confirmAppointmentButton.setEnabled(false);
@@ -230,6 +233,86 @@ public class MainReceptionistFrame extends JFrame {
                 JOptionPane.showMessageDialog(MainReceptionistFrame.this,
                         "The entered affiliation record does not match an active file.",
                         "Registry Warning", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+    
+    /**
+     * Inner class action handler managing the arrival confirmation state machine logic
+     * Validates row selection constraints and updates the visual data grid layout status
+     */
+    private class ConfirmAppointmentHandler implements java.awt.event.ActionListener {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            int selectedRow = appointmentsTable.getSelectedRow();
+            
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                        "Please select an active appointment entry from the table grid first.",
+                        "Selection Required", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Integer appointmentId = (Integer) tableModel.getValueAt(selectedRow, 0);
+            String currentStatus = (String) tableModel.getValueAt(selectedRow, 5);
+
+            if ("CONFIRMED".equalsIgnoreCase(currentStatus)) {
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                        "This appointment slot has already been marked as CONFIRMED.",
+                        "Operation Redundant", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            int confirmChoice = JOptionPane.showConfirmDialog(MainReceptionistFrame.this,
+                    "Are you sure you want to confirm patient arrival for Appointment ID: " + appointmentId + "?",
+                    "Confirm Arrival Handshake", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+            if (confirmChoice == JOptionPane.YES_OPTION) {
+                tableModel.setValueAt("CONFIRMED", selectedRow, 5);
+                
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                        "Patient arrival checked in successfully. Appointment status shifted to CONFIRMED.",
+                        "Transaction Complete", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Inner class action handler managing transaction slot cancellation boundaries
+     * Reverts active rows into CANCELED states after explicit staff authorization choice
+     */
+    private class CancelAppointmentHandler implements java.awt.event.ActionListener {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            int selectedRow = appointmentsTable.getSelectedRow();
+            
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                        "Please select an active appointment entry from the table grid first.",
+                        "Selection Required", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Integer appointmentId = (Integer) tableModel.getValueAt(selectedRow, 0);
+            String currentStatus = (String) tableModel.getValueAt(selectedRow, 5);
+
+            if ("CANCELED".equalsIgnoreCase(currentStatus)) {
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                        "This appointment entry is already registered as CANCELED.",
+                        "Operation Redundant", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            int confirmChoice = JOptionPane.showConfirmDialog(MainReceptionistFrame.this,
+                    "Warning: Are you sure you want to CANCEL Appointment ID: " + appointmentId + "?\nThis will free up the time slot.",
+                    "Cancel Appointment Request", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+            if (confirmChoice == JOptionPane.YES_OPTION) {
+                tableModel.setValueAt("CANCELED", selectedRow, 5);
+                
+                JOptionPane.showMessageDialog(MainReceptionistFrame.this,
+                        "The appointment slot has been successfully revoked and marked as CANCELED.",
+                        "Transaction Revoked", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }

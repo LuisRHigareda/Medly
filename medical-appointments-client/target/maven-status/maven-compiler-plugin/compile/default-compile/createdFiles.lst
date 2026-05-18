@@ -1,10 +1,14 @@
 com\medical\medicalclient\view\LoginFrame$LoginActionHandler.class
 com\medical\medicalclient\client\AuthClient.class
+com\medical\medicalclient\view\MainReceptionistFrame$PatientSearchHandler.class
 com\medical\medicalclient\client\AppointmentClient.class
 com\medical\medicalclient\dto\LoginResponse.class
 com\medical\medicalclient\dto\PatientResponse.class
+com\medical\medicalclient\view\MainReceptionistFrame$1.class
+com\medical\medicalclient\view\MainReceptionistFrame$CancelAppointmentHandler.class
 com\medical\medicalclient\MedicalAppointmentsClient.class
 com\medical\medicalclient\dto\AddressResponse.class
+com\medical\medicalclient\view\MainReceptionistFrame$ConfirmAppointmentHandler.class
 com\medical\medicalclient\dto\DoctorResponse.class
 com\medical\medicalclient\view\MainReceptionistFrame.class
 com\medical\medicalclient\dto\ReceptionistResponse.class
