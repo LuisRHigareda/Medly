@@ -1,11 +1,18 @@
 package controller;
 
-import jakarta.servlet.http.HttpSession;
+import client.LoginRequest;
+import client.LoginResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
 /**
  * Handles the home page's petitions
@@ -14,32 +21,56 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping(path = {"/index", "/"})
 public class HomeController {
+    
+    private final RestClient restClient;
+
+    public HomeController(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder
+                .baseUrl("http://localhost:8080/api")
+                .build();
+    }
+    
     /**
      * Retrieves the home page. If the user is logged in,
      * he is redirected to the home page.
-     * @param session User's session
+     * @param jwtToken
      * @return The home page document's name
      */
     @GetMapping
-    public String showHome(HttpSession session) {
-        Integer userId = (Integer) session.getAttribute("user");
-        return (userId == null) ? "index" : "redirect:/menu";
+    public String showHome(@CookieValue(value = "jwt-token", required = false) String jwtToken) {
+        return (jwtToken == null || jwtToken.isEmpty()) ? "index" : "redirect:/menu";
     }
     
     @PostMapping("/login")
-    public String showMenu(
-            HttpSession session,
+    public String login(
+            HttpServletResponse response,
             @RequestParam("email") String email,
-            @RequestParam("affiliation_number") String affiliationNumber,
             @RequestParam("password") String password
-    ){
-        if((email != null || affiliationNumber != null) && password != null){
-            // This would be where the user's id is retrieved to later store it in the session...
-            // Hardcoded for now...
-            Integer userId = 1;
-            session.setAttribute("user", userId);
+    ) {
+        try {
+            LoginResponse authResponse = restClient
+                    .post()
+                    .uri("/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new LoginRequest(email, password))
+                    .retrieve()
+                    .body(LoginResponse.class);
+            
+            String jwtToken = authResponse.getJwtToken();
+            
+            Cookie jwtCookie = new Cookie("jwt-token", jwtToken);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(60 * 60 * 24);
+            
+            response.addCookie(jwtCookie);
+            
             return "redirect:/menu";
-        } else
-            return "redirect:/index?error=params_missing";
+            
+        } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.Forbidden e) {
+            return "redirect:/index?error=bad_credentials";
+        } catch (Exception e) {
+            return "redirect:/index?error=unknown_error";
+        }
     }
 }
