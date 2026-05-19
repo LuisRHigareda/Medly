@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         scanBasePackages = {
             "controller",
             "config",
+            "security",
             "model",
             "contract",
             "service",

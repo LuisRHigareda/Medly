@@ -53,6 +53,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-session-data-redis</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- JAX_WS API -->
         <dependency>
             <groupId>jakarta.xml.ws</groupId>
@@ -64,6 +73,11 @@
             <artifactId>jaxws-rt</artifactId>
             <version>4.0.4</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>3.3.0</version>
         </dependency>
     </dependencies>
 
@@ -81,12 +95,16 @@
                 <executions>
                     <execution>
                         <!-- Reads the WSDL -->
-                        <goals><goal>wsimport</goal></goals>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
                     </execution>
                 </executions>
                 <configuration>
                     <!-- The Web Service's URL goes here -->
-                    <wsdlUrls><wsdlUrl>http://localhost:8081/ws/appointments.wsdl</wsdlUrl></wsdlUrls>
+                    <wsdlUrls>
+                        <wsdlUrl>http://localhost:8080/api/appointments/appointments.wsdl</wsdlUrl>
+                    </wsdlUrls>
                     <!-- The Java package where the generated classess will be located -->
                     <packageName>wsc</packageName>
                     <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>

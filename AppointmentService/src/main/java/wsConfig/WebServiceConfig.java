@@ -23,14 +23,13 @@ public class WebServiceConfig {
         return new ServletRegistrationBean<>(servlet, "/ws/*");
     }
     
-    // Se generará en: http://localhost:8080/ws/appointments.wsdl
     @Bean
-    public DefaultWsdl11Definition appointments(XsdSchema appointmentsSchema) { // Corregido: Usamos la interfaz XsdSchema
+    public DefaultWsdl11Definition appointments(XsdSchema appointmentsSchema) { 
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("AppointmentsPort");
-        wsdl11Definition.setLocationUri("/ws");
+        wsdl11Definition.setLocationUri("/api/appointments");
         wsdl11Definition.setTargetNamespace("http://itson.edu.mx/soap/appointments");
-        wsdl11Definition.setSchema(appointmentsSchema); // Inyectamos el bean corregido
+        wsdl11Definition.setSchema(appointmentsSchema);
         return wsdl11Definition;
     }
     

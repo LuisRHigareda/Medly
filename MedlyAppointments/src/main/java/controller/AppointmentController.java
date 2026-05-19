@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import model.NewAppointmentDTO;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,15 +32,14 @@ public class AppointmentController {
     }
     
     @GetMapping
-    public String redirect(HttpSession session){return "redirect:/schedule/doctor";}
+    public String redirect(){return "redirect:/schedule/doctor";}
     
     /**
      * Retrieves the consulting room/doctor selection page.
-     * @param session Current user's session
      * @return The document's name
      */
     @GetMapping("/doctor") 
-    public String showDoctor(HttpSession session) {return "doctor";}
+    public String showDoctor() {return "doctor";}
     
     /**
      * Catches the data from the consulting room/doctor page's form.
@@ -75,7 +75,8 @@ public class AppointmentController {
     @PostMapping("/submit") 
     public String registerForm(
             HttpSession session,
-            @RequestParam("datetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime
+            @RequestParam("datetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime,
+            Authentication authentication
     ){        
         // Retrieves the consulting room's id and checks if it's present
         Integer consultingRoomId = (Integer) session.getAttribute("consulting_room");
@@ -85,7 +86,7 @@ public class AppointmentController {
         if(dateTime != null){
             try {
                 // Finally, retrieves the user's id
-                Integer userId = (Integer) session.getAttribute("user");
+                Integer userId = (Integer) authentication.getDetails();;
                 // Builds up the transferable object
                 NewAppointmentDTO appointment = new NewAppointmentDTO();
                 appointment.setPatientId(userId);
