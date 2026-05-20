@@ -86,7 +86,7 @@ public class AppointmentController {
         if(dateTime != null){
             try {
                 // Finally, retrieves the user's id
-                Integer userId = (Integer) authentication.getDetails();;
+                Integer userId = (Integer) authentication.getDetails();
                 // Builds up the transferable object
                 NewAppointmentDTO appointment = new NewAppointmentDTO();
                 appointment.setPatientId(userId);

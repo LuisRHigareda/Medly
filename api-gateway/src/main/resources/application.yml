@@ -12,7 +12,6 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=/api/appointments/**
-            - Method=GET,POST
           filters:
             - RewritePath=/api/appointments(?<segment>/?.*), /ws$\{segment}
             - RemoveRequestHeader=X-Forwarded-Prefix

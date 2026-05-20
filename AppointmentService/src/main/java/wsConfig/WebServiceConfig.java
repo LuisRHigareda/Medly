@@ -27,7 +27,7 @@ public class WebServiceConfig {
     public DefaultWsdl11Definition appointments(XsdSchema appointmentsSchema) { 
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("AppointmentsPort");
-        wsdl11Definition.setLocationUri("/api/appointments");
+        wsdl11Definition.setLocationUri("/ws");
         wsdl11Definition.setTargetNamespace("http://itson.edu.mx/soap/appointments");
         wsdl11Definition.setSchema(appointmentsSchema);
         return wsdl11Definition;

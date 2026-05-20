@@ -1,11 +1,11 @@
 package controller;
 
 import client.LoginRequest;
-import client.LoginResponse;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,15 +54,14 @@ public class HomeController {
     ) {
         try {
             // Sends credentials and receives the generated token
-            LoginResponse authResponse = restClient
+            Map<String, String> authResponse = restClient
                     .post()
                     .uri("/login")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(new LoginRequest(email, password))
-                    .retrieve()
-                    .body(LoginResponse.class);
+                    .retrieve().body(Map.class);
             // Retrieves the token
-            String jwtToken = authResponse.getJwtToken();
+            String jwtToken = authResponse.get("jwt-token");
             // Decodes the token and retrieves the user's role
             DecodedJWT decoded = JWTUtil.validateToken(jwtToken);
             String role = decoded.getClaim("role").asString();
