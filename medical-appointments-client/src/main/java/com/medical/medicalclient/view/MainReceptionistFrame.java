@@ -268,7 +268,6 @@ public class MainReceptionistFrame extends JFrame {
     
     /**
      * Inner class action handler responsible for capturing the patient lookup trigger
-     * Fetches live demographic and appointment records using explicit data mapping names
      */
     private class PatientSearchHandler implements java.awt.event.ActionListener {
         @Override
@@ -299,16 +298,20 @@ public class MainReceptionistFrame extends JFrame {
                     }
                     
                     tableModel.setRowCount(0);
-                    var appointments = appointmentClient.getAppointmentsByPatientAffiliation(affiliation);
+                    
+                    var appointments = appointmentClient.getAppointmentsByPatientId(patient.getId());
                     
                     if (appointments != null && !appointments.isEmpty()) {
                         for (var appt : appointments) {
+                            String dateStr = (appt.getDate() != null) ? appt.getDate().toString() : "---";
+                            String timeStr = (appt.getTime() != null) ? appt.getTime().toString() : "---";
+                            
                             tableModel.addRow(new Object[]{
                                 appt.getId(),
-                                appt.getDoctorName(),
-                                appt.getConsultingRoomName(),
-                                appt.getDate() != null ? appt.getDate().toString() : "---",
-                                appt.getTime() != null ? appt.getTime().toString() : "---",
+                                appt.getDoctorName() != null ? appt.getDoctorName() : "Doctor ID: " + appt.getDoctorId(),
+                                appt.getConsultingRoomName() != null ? appt.getConsultingRoomName() : "Room ID: " + appt.getConsultingRoomId(),
+                                dateStr,
+                                timeStr,
                                 appt.getStatus()
                             });
                         }
@@ -367,7 +370,6 @@ public class MainReceptionistFrame extends JFrame {
 
             if (confirmChoice == JOptionPane.YES_OPTION) {
                 try {
-                    // LLAMADA HTTP PUT REAL AL SERVIDOR
                     boolean success = appointmentClient.confirmAppointment(appointmentId);
                     if (success) {
                         tableModel.setValueAt("CONFIRMED", selectedRow, 5);

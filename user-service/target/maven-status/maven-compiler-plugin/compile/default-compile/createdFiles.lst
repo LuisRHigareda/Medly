@@ -6,6 +6,7 @@ com\medical\userservice\model\Location.class
 com\medical\userservice\model\ConsultingRoom.class
 com\medical\userservice\dto\PatientResponse.class
 com\medical\userservice\model\UserType.class
+com\medical\userservice\jwt\JWTUtil.class
 com\medical\userservice\repository\PatientRepository.class
 com\medical\userservice\repository\DoctorRepository.class
 com\medical\userservice\dto\AddressResponse.class

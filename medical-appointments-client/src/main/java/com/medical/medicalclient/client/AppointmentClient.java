@@ -34,10 +34,10 @@ public class AppointmentClient {
      * @param affiliationNumber The unique identifier assigned to the patient
      * @return A list of AppointmentResponse DTOs, or an empty list if an error occurs
      */
-    public List<AppointmentResponse> getAppointmentsByPatientAffiliation(String affiliationNumber) {
+    public List<AppointmentResponse> getAppointmentsByPatientId(Integer patientId) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/patient/" + affiliationNumber))
+                    .uri(URI.create(BASE_URL + "/patient/" + patientId)) // Apunta a /api/appointments/patient/{id}
                     .header("Accept", "application/json")
                     .GET()
                     .build();
@@ -45,6 +45,7 @@ public class AppointmentClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
+                // Deserializa el JSON real de Leonardo
                 return objectMapper.readValue(response.body(), 
                         objectMapper.getTypeFactory().constructCollectionType(List.class, AppointmentResponse.class));
             } else {
@@ -52,7 +53,7 @@ public class AppointmentClient {
                 return Collections.emptyList();
             }
         } catch (Exception e) {
-            System.err.println("Network exception inside getAppointmentsByPatientAffiliation: " + e.getMessage());
+            System.err.println("Network exception inside getAppointmentsByPatientId: " + e.getMessage());
             return Collections.emptyList();
         }
     }

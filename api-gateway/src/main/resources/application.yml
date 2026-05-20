@@ -13,22 +13,23 @@ spring:
             allowedOrigins:
               - "http://localhost:5173"
               - "http://127.0.0.1:5173"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
+            allowedMethods: [GET, POST, PUT, DELETE, OPTIONS]
+            allowedHeaders: ["*"]
             allowCredentials: true
       routes:
-        - id: appointment-service
+        - id: appointment-service-rest
           uri: http://localhost:8081
           predicates:
             - Path=/api/appointments/**
           filters:
-            - RewritePath=/api/appointments(?<segment>/?.*), /ws$\{segment}
+            - RewritePath=/api/appointments(?<segment>/?.*), /appointments$\{segment}
+
+        - id: appointment-service-soap
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/soap/appointments/**
+          filters:
+            - RewritePath=/api/soap/appointments(?<segment>/?.*), /ws$\{segment}
             - RemoveRequestHeader=X-Forwarded-Prefix
 
         - id: medical-record-service
