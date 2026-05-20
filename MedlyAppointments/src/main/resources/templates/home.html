@@ -19,7 +19,9 @@
             <button onclick="location.href='/upcoming'">View Upcoming Appointments</button>
         </li>
         <li>
-            <button onclick="location.href='/logout'">Log out</button>
+            <form action="/home/logout" method="post">
+                <button type="submit">Logout</button>
+            </form>
         </li>
     </ul>
 </body>
