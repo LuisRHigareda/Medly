@@ -10,7 +10,6 @@ medications, and medical procedures.
 """
 
 from fastapi import FastAPI, Depends
-from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -20,15 +19,6 @@ from app.routers import medical_record, diagnosis, allergy, medication, prescrib
 
 # Create the FastAPI application instance
 app = FastAPI(title="MedicalRecordService")
-
-# Allow requests from the frontend dev server and Electron
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Register routers — JWT required on all clinical endpoints
 app.include_router(medical_record.router, dependencies=[Depends(verify_token)])
