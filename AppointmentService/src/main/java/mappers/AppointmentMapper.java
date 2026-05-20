@@ -13,8 +13,8 @@ public class AppointmentMapper {
     public static AppointmentDTO toDTO(Appointment entity){
         AppointmentDTO dto = new AppointmentDTO();
         dto.setId(entity.getId());
-        dto.setPatientId(entity.getId());
-        dto.setConsultingRoomId(entity.getId());
+        dto.setPatientId(entity.getPatientId());
+        dto.setConsultingRoomId(entity.getConsultingRoomId());
         dto.setDateTime(entity.getDateTime());
         return dto;
     }

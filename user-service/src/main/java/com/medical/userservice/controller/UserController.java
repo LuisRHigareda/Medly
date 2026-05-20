@@ -1,4 +1,6 @@
 package com.medical.userservice.controller;
+import com.medical.userservice.dto.ClinicResponse;
+import com.medical.userservice.dto.ConsultingRoomResponse;
 import com.medical.userservice.dto.DoctorResponse;
 import com.medical.userservice.dto.PatientResponse;
 import com.medical.userservice.dto.ReceptionistResponse;
@@ -44,5 +46,22 @@ public class UserController {
         return userQueryService.findDoctorById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/clinics")
+    public ResponseEntity<List<ClinicResponse>> findAllClinics(){
+        return ResponseEntity.ok(userQueryService.findAllClinics());
+    }
+    
+    @GetMapping("/consulting_room/{id}")
+    public ResponseEntity<ConsultingRoomResponse> findConsultingRoomById(@PathVariable Integer id){
+        ConsultingRoomResponse response = userQueryService.findConsultingRoomById(id);
+        return (response != null) ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
+    }
+    
+    @GetMapping("/consulting_room/clinic/{id}")
+    public ResponseEntity<List<ConsultingRoomResponse>> findConsultingRoomsByClinic(@PathVariable Integer id){
+        List<ConsultingRoomResponse> response = userQueryService.findConsultingRoomsByClinic(id);
+        return (response != null) ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
     }
 }

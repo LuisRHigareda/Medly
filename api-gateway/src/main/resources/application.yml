@@ -20,16 +20,14 @@ spring:
         - id: appointment-service-rest
           uri: http://localhost:8081
           predicates:
-            - Path=/api/appointments/**
-          filters:
-            - RewritePath=/api/appointments(?<segment>/?.*), /appointments$\{segment}
+            - Path=/api/appointments/bookings/**
 
-        - id: appointment-service-soap
+        - id: appointment-service
           uri: http://localhost:8081
           predicates:
-            - Path=/api/soap/appointments/**
+            - Path=/api/appointments/**
           filters:
-            - RewritePath=/api/soap/appointments(?<segment>/?.*), /ws$\{segment}
+            - RewritePath=/api/appointments(?<segment>/?.*), /ws$\{segment}
             - RemoveRequestHeader=X-Forwarded-Prefix
 
         - id: medical-record-service

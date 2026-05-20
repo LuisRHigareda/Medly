@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author Leonardo Flores Leyva - 252390
  */
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("api/appointments/bookings")
 public class AppointmentController {
     
     private final IAppointmentService appointmentService;

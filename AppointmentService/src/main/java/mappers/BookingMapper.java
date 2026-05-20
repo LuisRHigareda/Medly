@@ -13,7 +13,7 @@ public class BookingMapper {
     public static BookingDTO toDTO(Booking entity){
         BookingDTO dto = new BookingDTO();
         dto.setId(entity.getId());
-        dto.setPatientId(entity.getId());
+        dto.setPatientId(entity.getPatientId());
         dto.setReferenceNumber(entity.getReferenceNumber());
         dto.setStatus(entity.getStatus());
         dto.setAppointment(AppointmentMapper.toDTO(entity.getAppointment()));
