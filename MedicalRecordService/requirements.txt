@@ -1,8 +1,13 @@
+fpdf2==2.8.7
+httpx==0.28.1
+pytest==9.0.3
+pytest-html==4.2.0
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
 click==8.3.2
 colorama==0.4.6
+cryptography==47.0.0
 fastapi==0.136.0
 greenlet==3.4.0
 h11==0.16.0
