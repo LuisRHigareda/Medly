@@ -8,7 +8,7 @@
 <body>
     <h1>Upcoming Appointments</h1>
     <ul>
-
+        <li th:each="booking: ${bookings}" th:text="${booking.appointment.dateTime}"></li>
     </ul>
 </body>
 </html>

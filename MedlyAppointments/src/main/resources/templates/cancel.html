@@ -12,9 +12,10 @@
         <select name="cancel_booking" id="cancel_booking">
             <option 
                 th:each="booking: ${bookings}"
-                th:value="booking.id"
-                th:text="booking.appointment.dateTime"></option>
+                th:value="${booking.id}"
+                th:text="${booking.appointment.dateTime}"></option>
         </select>
+        <button type="submit">Cancel</button>
     </form>
 </body>
 </html>
