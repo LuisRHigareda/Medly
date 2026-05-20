@@ -1,6 +1,8 @@
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\controller\AuthController.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\controller\UserController.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\dto\AddressResponse.java
+C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\dto\ClinicResponse.java
+C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\dto\ConsultingRoomResponse.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\dto\DoctorResponse.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\dto\LoginRequest.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\dto\LoginResponse.java
@@ -18,6 +20,8 @@ C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\co
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\model\Specialization.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\model\User.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\model\UserType.java
+C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\repository\ClinicRepository.java
+C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\repository\ConsultingRoomRepository.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\repository\DoctorRepository.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\repository\PatientRepository.java
 C:\Users\Yuri German Garcia\Documents\GitHub\Medly\user-service\src\main\java\com\medical\userservice\repository\ReceptionistRepository.java

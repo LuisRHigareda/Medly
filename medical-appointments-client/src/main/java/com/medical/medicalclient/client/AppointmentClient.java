@@ -6,22 +6,34 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+// SOAP Classes
+import wsc.AddAppointmentRequest;
+import wsc.AddAppointmentResponse;
+import wsc.CancelAppointmentRequest;
+import wsc.CancelAppointmentResponse;
+import wsc.ConfirmAppointmentRequest;
+import wsc.ConfirmAppointmentResponse;
+import wsc.AppointmentsPort;
+import wsc.AppointmentsPortService;
 /**
  * Service client responsible for managing the life cycle of medical appointments
+ * Uses native JAX-WS SOAP proxies generated from the corporate WSDL contract
  * @author Yuri German Garcia López - 252583
  */
 public class AppointmentClient {
-    // API Gateway base URL endpoint routing toward appointment service modules
-    private static final String BASE_URL = "http://localhost:8080/api/appointments";
+    
+    private static final String REST_BASE_URL = "http://localhost:8080/api/appointments";
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Initializes the native HTTP Client with proper network timeouts and 
-     * registers the globally shared Jackson ObjectMapper configuration
-     */
     public AppointmentClient() {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
@@ -29,24 +41,29 @@ public class AppointmentClient {
         this.objectMapper = JsonMapperConfig.getMapper();
     }
 
-    /**
-     * Fetches all upcoming medical appointments associated with a patient's affiliation number
-     * @param affiliationNumber The unique identifier assigned to the patient
-     * @return A list of AppointmentResponse DTOs, or an empty list if an error occurs
-     */
     public List<AppointmentResponse> getAppointmentsByPatientId(Integer patientId) {
         try {
+            String bypassUrl = "http://localhost:8081/appointments/patient/" + patientId;
+
+            System.out.println("Disparando petición REST Directa: " + bypassUrl);
+
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/patient/" + patientId)) // Apunta a /api/appointments/patient/{id}
+                    .uri(URI.create(bypassUrl))
                     .header("Accept", "application/json")
                     .GET()
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+            System.out.println("REST Direct Response - Status Code: " + response.statusCode());
+
             if (response.statusCode() == 200) {
-                // Deserializa el JSON real de Leonardo
-                return objectMapper.readValue(response.body(), 
+                String body = response.body();
+                if (body == null || body.trim().isEmpty()) {
+                    System.out.println("No appointments found for patient ID: " + patientId);
+                    return Collections.emptyList();
+                }
+                return objectMapper.readValue(body, 
                         objectMapper.getTypeFactory().constructCollectionType(List.class, AppointmentResponse.class));
             } else {
                 System.err.println("Failed to fetch appointments. HTTP Status Code: " + response.statusCode());
@@ -58,72 +75,58 @@ public class AppointmentClient {
         }
     }
 
-    /**
-     * Registers a new medical appointment time slot within the scheduling grid system
-     * @param appointment The AppointmentResponse payload detailing date, time, doctor, and room contexts
-     * @return true if the booking transaction completes successfully, false otherwise.
-     */
-    public boolean bookAppointment(AppointmentResponse appointment) {
+    public String bookAppointment(AppointmentResponse appointment) {
         try {
-            String jsonBody = objectMapper.writeValueAsString(appointment);
+            AddAppointmentRequest request = new AddAppointmentRequest();
+            request.setPatientId(appointment.getPatientId());
+            request.setConsultingRoomId(appointment.getConsultingRoomId());
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/book"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
+            LocalDateTime datetime = LocalDateTime.of(appointment.getDate(), appointment.getTime());
+            GregorianCalendar gCalendar = GregorianCalendar.from(ZonedDateTime.of(datetime, ZoneId.systemDefault()));
+            XMLGregorianCalendar xmlDateTime = DatatypeFactory.newInstance().newXMLGregorianCalendar(gCalendar);
+            request.setDateTime(xmlDateTime);
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            AppointmentsPortService service = new AppointmentsPortService();
+            AppointmentsPort port = service.getAppointmentsPortSoap11();
+            AddAppointmentResponse response = port.addAppointment(request);
 
-            return response.statusCode() == 200 || response.statusCode() == 201;
+            return String.format("%s\nReference number: %s", 
+                    response.getSuccessMessage(), 
+                    response.getReferenceNumber());
         } catch (Exception e) {
-            System.err.println("Network exception while booking a new appointment slot: " + e.getMessage());
-            return false;
+            System.err.println("SOAP Exception inside bookAppointment: " + e.getMessage());
+            return null;
         }
     }
 
-    /**
-     * Updates an appointment status state to CONFIRMED.
-     * The receptionist has a strict 15-minute window before the slot shifts to MISSED.
-     * * @param appointmentId The primary key identifier of the targeted appointment.
-     * @return true if the status transition updates successfully on the server side, false otherwise.
-     */
     public boolean confirmAppointment(Integer appointmentId) {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/confirm/" + appointmentId))
-                    .header("Content-Type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.noBody())
-                    .build();
+            ConfirmAppointmentRequest request = new ConfirmAppointmentRequest();
+            request.setAppointmentId(appointmentId);
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            AppointmentsPortService service = new AppointmentsPortService();
+            AppointmentsPort port = service.getAppointmentsPortSoap11();
+            ConfirmAppointmentResponse response = port.confirmAppointment(request);
 
-            return response.statusCode() == 200;
+            return response.getSuccessMessage() != null;
         } catch (Exception e) {
-            System.err.println("Network exception while executing confirmAppointment: " + e.getMessage());
+            System.err.println("SOAP Exception inside confirmAppointment: " + e.getMessage());
             return false;
         }
     }
 
-    /**
-     * Cancels an appointment from the system database records
-     * Operations are restricted if executed beyond a 24-hour post-booking threshold
-     * @param appointmentId The primary key identifier of the targeted appointment
-     * @return true if the cancellation transaction is successfully processed, false otherwise
-     */
     public boolean cancelAppointment(Integer appointmentId) {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/cancel/" + appointmentId))
-                    .header("Content-Type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.noBody())
-                    .build();
+            CancelAppointmentRequest request = new CancelAppointmentRequest();
+            request.setAppointmentId(appointmentId);
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            AppointmentsPortService service = new AppointmentsPortService();
+            AppointmentsPort port = service.getAppointmentsPortSoap11();
+            CancelAppointmentResponse response = port.cancelAppointment(request);
 
-            return response.statusCode() == 200;
+            return response.getSuccessMessage() != null;
         } catch (Exception e) {
-            System.err.println("Network exception while executing cancelAppointment: " + e.getMessage());
+            System.err.println("SOAP Exception inside cancelAppointment: " + e.getMessage());
             return false;
         }
     }

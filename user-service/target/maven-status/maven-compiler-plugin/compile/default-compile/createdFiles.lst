@@ -6,10 +6,13 @@ com\medical\userservice\model\Location.class
 com\medical\userservice\model\ConsultingRoom.class
 com\medical\userservice\dto\PatientResponse.class
 com\medical\userservice\model\UserType.class
+com\medical\userservice\repository\ClinicRepository.class
+com\medical\userservice\dto\ClinicResponse.class
 com\medical\userservice\jwt\JWTUtil.class
 com\medical\userservice\repository\PatientRepository.class
 com\medical\userservice\repository\DoctorRepository.class
 com\medical\userservice\dto\AddressResponse.class
+com\medical\userservice\dto\ConsultingRoomResponse.class
 com\medical\userservice\controller\UserController.class
 com\medical\userservice\repository\ReceptionistRepository.class
 com\medical\userservice\service\AuthService.class
@@ -22,6 +25,7 @@ com\medical\userservice\dto\ReceptionistResponse.class
 com\medical\userservice\dto\ValidationResponse.class
 com\medical\userservice\model\User.class
 com\medical\userservice\UserServiceApplication.class
+com\medical\userservice\repository\ConsultingRoomRepository.class
 com\medical\userservice\service\UserQueryService.class
 com\medical\userservice\model\Doctor.class
 com\medical\userservice\model\Clinic.class
