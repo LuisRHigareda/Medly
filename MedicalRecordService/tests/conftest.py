@@ -18,6 +18,7 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.database.base import Base
 from app.database.session import get_db
+from app.auth.jwt_bearer import verify_token
 
 # Use a file-based SQLite database for tests so all connections share the same data.
 # The file is created fresh for each test via setup/teardown.
@@ -52,6 +53,8 @@ def client():
             db.close()
 
     app.dependency_overrides[get_db] = override_get_db
+    # Bypass JWT authentication in tests
+    app.dependency_overrides[verify_token] = lambda: {"id": 1, "email": "test@medly.com", "role": "DOCTOR"}
 
     with TestClient(app) as test_client:
         yield test_client

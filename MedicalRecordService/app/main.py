@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from app.database.session import get_db
+from app.auth.jwt_bearer import verify_token
 from app.routers import medical_record, diagnosis, allergy, medication, prescribed_medication, medical_procedure
 
 # Create the FastAPI application instance
@@ -29,13 +30,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routers — each one handles a group of related endpoints
-app.include_router(medical_record.router)
-app.include_router(diagnosis.router)
-app.include_router(allergy.router)
-app.include_router(medication.router)
-app.include_router(prescribed_medication.router)
-app.include_router(medical_procedure.router)
+# Register routers — JWT required on all clinical endpoints
+app.include_router(medical_record.router, dependencies=[Depends(verify_token)])
+app.include_router(diagnosis.router, dependencies=[Depends(verify_token)])
+app.include_router(allergy.router, dependencies=[Depends(verify_token)])
+app.include_router(medication.router, dependencies=[Depends(verify_token)])
+app.include_router(prescribed_medication.router, dependencies=[Depends(verify_token)])
+app.include_router(medical_procedure.router, dependencies=[Depends(verify_token)])
 
 
 @app.get("/")
