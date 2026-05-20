@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose a clinic</title>
+</head>
+<body>
+    <h1>Clinics</h1>
+    <h2>Choose a clinic:</h2>
+    <form action="/schedule/clinic" method="post" required>
+        <label for="clinic">Clinics:</label>
+        <select name="clinic" id="clinic">
+            <option 
+                th:each="clinic: ${clinics}" 
+                th:value="${clinic.id}" 
+                th:text="${clinic.name} + ' - ' + ${clinic.street} + ', ' + ${clinic.state} + ', ' + ${clinic.city}"></option>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

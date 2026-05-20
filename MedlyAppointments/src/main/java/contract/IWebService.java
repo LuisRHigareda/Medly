@@ -1,7 +1,7 @@
 package contract;
 
 import exceptions.ServiceException;
-import model.AppointmentDTO;
+import model.CancelAppointmentDTO;
 import model.NewAppointmentDTO;
 
 /**
@@ -22,5 +22,5 @@ public interface IWebService {
      * @return A reponse message
      * @throws ServiceException Exception if something goes wrong
      */
-    public String cancelAppointment(AppointmentDTO appointment) throws ServiceException;
+    public String cancelAppointment(CancelAppointmentDTO appointment) throws ServiceException;
 }

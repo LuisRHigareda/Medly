@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Cancellation</title>
+</head>
+<body>
+    <h1>Are you sure you want to cancel the chosen appointment?</h1>
+    <form action="/cancel/confirm/submit" method="post">
+        <button type="submit">Yes</button>
+    </form>
+    <form action="/cancel/confirm/rescind" method="post">
+        <button type="submit">No</button>
+    </form>
+</body>
+</html>

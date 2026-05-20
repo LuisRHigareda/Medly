@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Appointment</title>
+</head>
+<body>
+    <h1>Choose an appointment to cancel</h1>
+    <form action="/cancel" method="post" required>
+        <label for="cancel_booking">Appointments:</label>
+        <select name="cancel_booking" id="cancel_booking">
+            <option 
+                th:each="booking: ${bookings}"
+                th:value="booking.id"
+                th:text="booking.appointment.dateTime"></option>
+        </select>
+    </form>
+</body>
+</html>

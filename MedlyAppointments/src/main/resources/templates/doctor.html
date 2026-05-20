@@ -7,13 +7,14 @@
     </head>
     <body>
         <h1>Appointment's Consulting Room</h1>
-        <h2>Select the desired consulting room or doctor:</h2>
-        <form action="/schedule/doctor_submit" method="post" required>
+        <h2>Choose the desired consulting room or doctor:</h2>
+        <form action="/schedule/doctor" method="post" required>
             <label for="consulting_room">Choose a doctor:</label>
             <select name="consulting_room" id="consulting_room">
-                <option value="1">Room 1: Dr. Smith</option>
-                <option value="2">Room 2: Dr. Johnson</option>
-                <option value="3">Room 3: Dr. Lee</option>
+                <option 
+                    th:each="doctor: ${doctors}" 
+                    th:value="${doctor.id}" 
+                    th:text="${doctor.room} + ' - ' + ${doctor.doctorName} + ', ' + ${doctor.specialization}"></option>
             </select>
             <button type="submit">Submit</button>
         </form>
