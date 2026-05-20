@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { removeToken } from '../api/auth'
 import './PatientSearch.css'
 
 function PatientSearch() {
@@ -13,11 +14,21 @@ function PatientSearch() {
     }
   }
 
+  const handleLogout = () => {
+    removeToken()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <div className="search-container">
       <div className="search-card">
-        <h1>Medly</h1>
-        <p>Medical Record Service</p>
+        <div className="search-header">
+          <div>
+            <h1>Medly</h1>
+            <p>Medical Record Service</p>
+          </div>
+          <button className="logout-btn" onClick={handleLogout}>Log out</button>
+        </div>
         <form onSubmit={handleSearch} className="search-form">
           <label>Patient ID</label>
           <input
