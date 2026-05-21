@@ -38,18 +38,18 @@ def _section_header(pdf: FPDF, title: str) -> None:
 
 
 def _label_value(pdf: FPDF, label: str, value: str) -> None:
-    """Print a bold label followed by its value on the same line."""
+    """Print a bold label followed by its value, wrapping long values."""
     pdf.set_font("Helvetica", style="B", size=10)
     pdf.cell(45, LINE_HEIGHT, f"{label}:", new_x=XPos.RIGHT, new_y=YPos.TOP)
     pdf.set_font("Helvetica", size=10)
-    pdf.cell(0, LINE_HEIGHT, value, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.multi_cell(CONTENT_WIDTH - 45, LINE_HEIGHT, value, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
 
 def _row(pdf: FPDF, text: str) -> None:
     """Print a plain indented row (used inside lists)."""
     pdf.set_font("Helvetica", size=10)
-    pdf.cell(5, LINE_HEIGHT, "", new_x=XPos.RIGHT, new_y=YPos.TOP)   # indent
-    pdf.multi_cell(CONTENT_WIDTH - 5, LINE_HEIGHT, text)
+    pdf.set_x(MARGIN + 5)
+    pdf.multi_cell(CONTENT_WIDTH - 5, LINE_HEIGHT, text, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
 
 def build_prescription_pdf(record: MedicalRecord) -> bytes:

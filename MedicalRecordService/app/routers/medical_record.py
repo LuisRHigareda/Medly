@@ -14,7 +14,7 @@ Endpoints:
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.database.session import get_db
 from app.models.medical_record import MedicalRecord
@@ -99,10 +99,10 @@ def get_prescription_pdf(record_id: int, db: Session = Depends(get_db)):
         db.query(MedicalRecord)
         .options(
             joinedload(MedicalRecord.blood_type),
-            joinedload(MedicalRecord.diagnoses).joinedload(Diagnosis.status),
-            joinedload(MedicalRecord.allergies),
-            joinedload(MedicalRecord.prescribed_medications).joinedload(PrescribedMedication.medication),
-            joinedload(MedicalRecord.procedures),
+            selectinload(MedicalRecord.diagnoses).joinedload(Diagnosis.status),
+            selectinload(MedicalRecord.allergies),
+            selectinload(MedicalRecord.prescribed_medications).joinedload(PrescribedMedication.medication),
+            selectinload(MedicalRecord.procedures),
         )
         .filter(MedicalRecord.id == record_id)
         .first()
