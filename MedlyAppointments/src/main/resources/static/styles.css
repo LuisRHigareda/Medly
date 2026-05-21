@@ -1,9 +1,136 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : May 2, 2026, 7:27:09 PM
-    Author     : PC WHITE WOLF
-*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f4f8; /* Fondo azul grisáceo */
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #33475b;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 40px 35px;
+    width: 100%;
+    max-width: 400px; /* Mantiene la tarjeta proporcionada en pantallas grandes */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: #2c405a;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+h2 {
+    color: #828fa3;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0 0 30px 0;
+}
+
+p {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2c405a;
+    margin-bottom: 8px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="datetime-local"],
+select {
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 15px;
+    margin-bottom: 20px;
+    color: #334155;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus,
+select:focus {
+    border-color: #2c405a;
+}
+
+button {
+    background-color: #354a5f;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    margin-top: 5px;
+}
+
+button:hover {
+    background-color: #223242;
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: #354a5f;
+    border: 1px solid #cbd5e1;
+}
+
+.btn-secondary:hover {
+    background-color: #f0f4f8;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    margin-bottom: 15px;
+}
+
+.list-item {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 14px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 15px;
+    color: #2c405a;
+    font-weight: 600;
+    margin-bottom: 10px;
+}

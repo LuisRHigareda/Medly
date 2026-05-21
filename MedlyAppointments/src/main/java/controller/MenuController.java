@@ -37,7 +37,7 @@ public class MenuController {
             jwtCookie.setPath("/");
             jwtCookie.setMaxAge(0);
             response.addCookie(jwtCookie);
-            return "redirect:/index?logout=success";
+            return "redirect:/index?error=logout_success";
         } else
             return "redirect:/index";
     }

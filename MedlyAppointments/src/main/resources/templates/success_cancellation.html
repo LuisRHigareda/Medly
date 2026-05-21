@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cancellation succeded</title>
+    <title>Cancellation Succeeded</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
 </head>
 <body>
-    <h1>Cancellation success!</h1>
-    <h2>The chosen appointment has been successfully cancelled!</h2>
-    <button onclick="location.href='/menu'">Return</button>
+    <div class="card">
+        <h1>Success!</h1>
+        <p>The chosen appointment has been successfully cancelled.</p>
+        <button onclick="location.href='/menu'">Return to Menu</button>
+    </div>
 </body>
 </html>

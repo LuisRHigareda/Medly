@@ -1,19 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Medly Appointments</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" th:href="@{/styles.css}">
     </head>
     <body>
-        <h1>Welcome to Medly Appointments</h1>
-        <h2>Log in with your email and password:</h2>
-        <form action="/login" method="post">
-            <label>Email:</label>
-            <input type="email" name="email" maxlength="100" required>
-            <label>Password:</label>
-            <input type="password" name="password" maxlength="20" required>
-            <button type="submit">Log In</button>
-        </form>
+        <div class="card">
+            <h1>Medly</h1>
+            <h2>Medical Record Service</h2>
+            <form action="/login" method="post">
+                <label>Email</label>
+                <input type="email" name="email" maxlength="100" placeholder="patient@medly.com" required>
+                
+                <label>Password</label>
+                <input type="password" name="password" maxlength="20" placeholder="••••••••" required>
+                
+                <button type="submit">Login</button>
+            </form>
+        </div>
     </body>
+    <script>
+        window.onload = (event) => {
+            const params = new URLSearchParams(window.location.search);
+            const error = params.get('error');
+            const emptyError = (!error || /^\s*$/.test(error));
+            if(!emptyError){
+                switch(error){
+                    case "unknown_error":
+                        alert("An unknown error ocurred! Please, contact our client support team if this continues to happen.");
+                        break;
+                    case "bad_credentials":
+                        alert("Incorrect email or password.");
+                        break;
+                    case "internal_error":
+                        alert("Something wrong happened on our side! Please, contact our client support team if this continues to happen.");
+                        break;
+                    case "logout_success":
+                        alert("You've been successfully logged out of the site!");
+                        break;
+                    case "auth_required":
+                        alert("You must enter your credentials!");
+                        break;
+                    case "unauthorized_role":
+                        alert("Only patients can enter the website!");
+                        break;
+                    case "access_denied":
+                        alert("Access denied! You must enter valid credentials!");
+                }
+            }
+        };
+    </script>
 </html>

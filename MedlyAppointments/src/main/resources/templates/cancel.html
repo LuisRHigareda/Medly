@@ -4,18 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Choose Appointment</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
 </head>
 <body>
-    <h1>Choose an appointment to cancel</h1>
-    <form action="/cancel" method="post" required>
-        <label for="cancel_booking">Appointments:</label>
-        <select name="cancel_booking" id="cancel_booking">
-            <option 
-                th:each="booking: ${bookings}"
-                th:value="${booking.id}"
-                th:text="${booking.appointment.dateTime}"></option>
-        </select>
-        <button type="submit">Cancel</button>
-    </form>
+    <div class="card">
+        <h1>Cancel Appointment</h1>
+        <h2>Select an appointment to cancel</h2>
+        <form action="/cancel" method="post" required>
+            <label for="cancel_booking">Your Appointments</label>
+            <select name="cancel_booking" id="cancel_booking">
+                <option 
+                    th:each="booking: ${bookings}"
+                    th:value="${booking.id}"
+                    th:text="${booking.appointment.dateTime}"></option>
+            </select>
+            <button type="submit">Proceed to Cancel</button>
+        </form>
+    </div>
 </body>
 </html>

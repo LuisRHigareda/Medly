@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointment Scheduled</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
 </head>
 <body>
-    <h1>Appointment Scheduled Successfully</h1>
-    <p>Your appointment has been scheduled. Click on the next button to return to the main menu.</p>
-    <button onclick="location.href='/menu'">Return</button>
+    <div class="card">
+        <h1>Scheduled!</h1>
+        <p>Your appointment has been successfully scheduled.</p>
+        <button onclick="location.href='/menu'">Return to Menu</button>
+    </div>
 </body>
 </html>

@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upcoming Dates</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
 </head>
 <body>
-    <h1>Upcoming Appointments</h1>
-    <ul>
-        <li th:each="booking: ${bookings}" th:text="${booking.appointment.dateTime}"></li>
-    </ul>
+    <div class="card">
+        <h1>Upcoming</h1>
+        <h2>Your scheduled appointments</h2>
+        <ul>
+            <li class="list-item" th:each="booking: ${bookings}" th:text="${booking.appointment.dateTime}"></li>
+        </ul>
+        <button onclick="location.href='/menu'" class="btn-secondary">Return to Menu</button>
+    </div>
 </body>
 </html>

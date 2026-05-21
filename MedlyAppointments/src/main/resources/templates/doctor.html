@@ -1,22 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>Doctor</title>
+        <title>Doctor Selection</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" th:href="@{/styles.css}">
     </head>
     <body>
-        <h1>Appointment's Consulting Room</h1>
-        <h2>Choose the desired consulting room or doctor:</h2>
-        <form action="/schedule/doctor" method="post" required>
-            <label for="consulting_room">Choose a doctor:</label>
-            <select name="consulting_room" id="consulting_room">
-                <option 
-                    th:each="doctor: ${doctors}" 
-                    th:value="${doctor.id}" 
-                    th:text="${doctor.room} + ' - ' + ${doctor.doctorName} + ', ' + ${doctor.specialization}"></option>
-            </select>
-            <button type="submit">Choose</button>
-        </form>
+        <div class="card">
+            <h1>Consulting Room</h1>
+            <h2>Choose a room or doctor</h2>
+            <form action="/schedule/doctor" method="post" required>
+                <label for="consulting_room">Available Doctors</label>
+                <select name="consulting_room" id="consulting_room">
+                    <option 
+                        th:each="doctor: ${doctors}" 
+                        th:value="${doctor.id}" 
+                        th:text="${doctor.room} + ' - ' + ${doctor.doctorName} + ', ' + ${doctor.specialization}"></option>
+                </select>
+                <button type="submit">Choose</button>
+            </form>
+        </div>
     </body>
 </html>

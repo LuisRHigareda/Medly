@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Cancellation</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
 </head>
 <body>
-    <h1>Are you sure you want to cancel the chosen appointment?</h1>
-    <form action="/cancel/confirm/submit" method="post">
-        <button type="submit">Yes</button>
-    </form>
-    <form action="/cancel/confirm/rescind" method="post">
-        <button type="submit">No</button>
-    </form>
+    <div class="card">
+        <h1>Are you sure?</h1>
+        <h2>Do you really want to cancel this appointment?</h2>
+        <div class="btn-group">
+            <form action="/cancel/confirm/submit" method="post" style="width: 100%;">
+                <button type="submit">Yes, Cancel</button>
+            </form>
+            <form action="/cancel/confirm/rescind" method="post" style="width: 100%;">
+                <button type="submit" class="btn-secondary">No, Keep it</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
