@@ -5,9 +5,11 @@ import com.medical.medicalclient.dto.DoctorResponse;
 import com.medical.medicalclient.dto.PatientResponse;
 import com.medical.medicalclient.dto.ReceptionistResponse;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -67,8 +69,13 @@ public class UserClient {
      */
     public PatientResponse getPatientByAffiliationNumber(String affiliationNumber) {
         try {
+            String encodedAffiliation = URLEncoder.encode(
+                    affiliationNumber.trim(),
+                    StandardCharsets.UTF_8
+            );
+
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/patients/" + affiliationNumber))
+                    .uri(URI.create(BASE_URL + "/patients/" + encodedAffiliation))
                     .header("Accept", "application/json")
                     .GET()
                     .build();
@@ -79,6 +86,7 @@ public class UserClient {
                 return objectMapper.readValue(response.body(), PatientResponse.class);
             } else {
                 System.err.println("Patient lookup failed. HTTP Status Code: " + response.statusCode());
+                System.err.println("Response body: " + response.body());
                 return null;
             }
         } catch (Exception e) {

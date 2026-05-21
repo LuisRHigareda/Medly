@@ -126,6 +126,8 @@ public class LoginFrame extends JFrame{
                                 "Login Successful", JOptionPane.INFORMATION_MESSAGE);
                         MainReceptionistFrame mainFrame = new MainReceptionistFrame(receptionist);
                         mainFrame.setVisible(true);
+                        
+                        LoginFrame.this.dispose();
                     } else {
                         JOptionPane.showMessageDialog(LoginFrame.this,
                                 "Could not recover specific receptionist workspace metadata.",

@@ -1,4 +1,5 @@
 package com.medical.medicalclient.client;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medical.medicalclient.dto.AppointmentResponse;
 import java.net.URI;
@@ -9,6 +10,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -43,19 +45,21 @@ public class AppointmentClient {
 
     public List<AppointmentResponse> getAppointmentsByPatientId(Integer patientId) {
         try {
-            String bypassUrl = "http://localhost:8081/appointments/patient/" + patientId;
+            // IMPORTANT: the Swing client must communicate through the API Gateway.
+            // Gateway route: /api/appointments/bookings/** -> AppointmentService REST controller.
+            String gatewayUrl = REST_BASE_URL + "/bookings/patient/" + patientId;
 
-            System.out.println("Disparando petición REST Directa: " + bypassUrl);
+            System.out.println("Sending REST request through Gateway: " + gatewayUrl);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(bypassUrl))
+                    .uri(URI.create(gatewayUrl))
                     .header("Accept", "application/json")
                     .GET()
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println("REST Direct Response - Status Code: " + response.statusCode());
+            System.out.println("Gateway REST Response - Status Code: " + response.statusCode());
 
             if (response.statusCode() == 200) {
                 String body = response.body();
@@ -63,16 +67,59 @@ public class AppointmentClient {
                     System.out.println("No appointments found for patient ID: " + patientId);
                     return Collections.emptyList();
                 }
-                return objectMapper.readValue(body, 
-                        objectMapper.getTypeFactory().constructCollectionType(List.class, AppointmentResponse.class));
+
+                return mapBookingJsonToAppointmentResponses(body);
             } else {
                 System.err.println("Failed to fetch appointments. HTTP Status Code: " + response.statusCode());
+                System.err.println("Response body: " + response.body());
                 return Collections.emptyList();
             }
         } catch (Exception e) {
             System.err.println("Network exception inside getAppointmentsByPatientId: " + e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * AppointmentService returns BookingDTO objects, where the appointment information
+     * is nested inside the "appointment" property. The Swing table expects a flat
+     * AppointmentResponse, so the JSON is adapted here without changing the backend contract.
+     */
+    private List<AppointmentResponse> mapBookingJsonToAppointmentResponses(String body) throws Exception {
+        JsonNode root = objectMapper.readTree(body);
+        List<AppointmentResponse> appointments = new ArrayList<>();
+
+        if (!root.isArray()) {
+            return appointments;
+        }
+
+        for (JsonNode bookingNode : root) {
+            JsonNode appointmentNode = bookingNode.path("appointment");
+
+            AppointmentResponse appointment = new AppointmentResponse();
+            appointment.setId(asInteger(bookingNode.path("id")));
+            appointment.setPatientId(asInteger(bookingNode.path("patientId")));
+            appointment.setStatus(bookingNode.path("status").asText("---"));
+
+            if (!appointmentNode.isMissingNode() && !appointmentNode.isNull()) {
+                appointment.setConsultingRoomId(asInteger(appointmentNode.path("consultingRoomId")));
+
+                String dateTime = appointmentNode.path("dateTime").asText(null);
+                if (dateTime != null && !dateTime.isBlank()) {
+                    java.time.LocalDateTime parsedDateTime = java.time.LocalDateTime.parse(dateTime);
+                    appointment.setDate(parsedDateTime.toLocalDate());
+                    appointment.setTime(parsedDateTime.toLocalTime());
+                }
+            }
+
+            appointments.add(appointment);
+        }
+
+        return appointments;
+    }
+
+    private Integer asInteger(JsonNode node) {
+        return (node != null && node.canConvertToInt()) ? node.asInt() : null;
     }
 
     public String bookAppointment(AppointmentResponse appointment) {
